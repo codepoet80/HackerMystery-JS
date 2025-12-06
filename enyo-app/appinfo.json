@@ -1,0 +1,10 @@
+{
+	"id": "com.hackermystery.game",
+	"version": "0.1.0",
+	"vendor": "HackerMystery",
+	"type": "web",
+	"main": "index.html",
+	"title": "HackerMystery",
+	"icon": "icon.png",
+	"uiRevision": 2
+}

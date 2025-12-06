@@ -1,0 +1,355 @@
+/**
+ * HackerMystery - Retro Mac Aesthetic
+ *
+ * 1-bit styling inspired by early Macintosh computers.
+ * Black and white color scheme with classic window chrome.
+ */
+
+/* ============================================
+   FONTS
+   ============================================ */
+
+/* Use a system monospace font that approximates Chicago/Monaco */
+.hm-app {
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+/* ============================================
+   DESKTOP
+   ============================================ */
+
+.hm-desktop {
+	width: 100%;
+	height: 100%;
+	background-color: #808080;
+	/* Classic Mac desktop pattern - diagonal lines */
+	background-image:
+		repeating-linear-gradient(
+			45deg,
+			transparent,
+			transparent 2px,
+			#707070 2px,
+			#707070 4px
+		);
+	position: relative;
+}
+
+.hm-desktop-icons {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	display: block;
+}
+
+/* ============================================
+   DESKTOP ICONS
+   ============================================ */
+
+.hm-desktop-icon {
+	width: 64px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.hm-desktop-icon-image {
+	width: 32px;
+	height: 32px;
+	margin: 0 auto 4px auto;
+	background-color: #FFFFFF;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	border: 1px solid #000000;
+}
+
+/* CSS-based terminal icon fallback */
+.hm-desktop-icon-terminal .hm-desktop-icon-image {
+	background-color: #000000;
+	position: relative;
+}
+
+.hm-desktop-icon-terminal .hm-desktop-icon-image:after {
+	content: ">";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -11px;
+	margin-left: -7px;
+	color: #00FF00;
+	font-family: monospace;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.hm-desktop-icon-label {
+	color: #FFFFFF;
+	font-size: 10px;
+	text-shadow: 1px 1px 0 #000000;
+	word-wrap: break-word;
+}
+
+/* Icon selection state */
+.hm-desktop-icon:active .hm-desktop-icon-image {
+	background-color: #000000;
+}
+
+.hm-desktop-icon:active .hm-desktop-icon-label {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+/* ============================================
+   WINDOWS
+   ============================================ */
+
+.hm-window {
+	position: absolute;
+	background-color: #FFFFFF;
+	border: 2px solid #000000;
+	box-shadow: 2px 2px 0 #000000;
+}
+
+/* Window title bar */
+.hm-window-titlebar {
+	height: 20px;
+	background-color: #FFFFFF;
+	border-bottom: 2px solid #000000;
+	position: relative;
+	cursor: move;
+}
+
+/* Title bar stripes - GIF for old browsers, gradient for modern */
+.hm-window-titlebar:before {
+	content: "";
+	position: absolute;
+	left: 30px;
+	right: 24px;
+	top: 50%;
+	margin-top: -7px;
+	height: 14px;
+	/* Tiled GIF for old WebKit (webOS) */
+	background-image: url("data:image/gif;base64,R0lGODlhAQADAPAAAAAAAP///yH5BAAAAAAALAAAAAABAAMAAAICDFQAOw==");
+	background-repeat: repeat;
+}
+
+/* Modern browsers: override with gradient */
+@supports (background: repeating-linear-gradient(black, black)) {
+	.hm-window-titlebar:before {
+		background-image: repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			#000000 2px,
+			#000000 3px
+		);
+		background-repeat: no-repeat;
+	}
+}
+
+/* Close box */
+.hm-window-close {
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	width: 12px;
+	height: 12px;
+	background-color: #FFFFFF;
+	border: 1px solid #000000;
+	cursor: pointer;
+}
+
+.hm-window-close:active {
+	background-color: #000000;
+}
+
+/* Window title text */
+.hm-window-title {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+	background-color: #FFFFFF;
+	padding: 0 8px;
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+/* Window content area */
+.hm-window-content {
+	position: absolute;
+	top: 30px;  /* Account for 28px title bar + 2px border */
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+}
+
+/* ============================================
+   TERMINAL
+   ============================================ */
+
+.hm-terminal {
+	width: 100%;
+	height: 100%;
+	background-color: #000000;
+	color: #00FF00;
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 14px;
+}
+
+.hm-terminal-output-scroller {
+	background-color: #000000;
+}
+
+.hm-terminal-output {
+	padding: 8px;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	color: #00FF00;
+	font-weight: bold;
+}
+
+.hm-terminal-input-row {
+	border-top: 1px solid #00FF00;
+	background-color: #000000;
+	padding: 4px 8px;
+	line-height: 20px;
+}
+
+.hm-terminal-prompt {	
+	vertical-align: middle;
+	color: #00FF00;
+	padding-right: 8px;
+	font-weight: bold;
+	font-size: 14px;
+	width: 1%;
+	white-space: nowrap;
+}
+
+.hm-terminal-input {
+	background-color: #000000 !important;
+	color: #00FF00 !important;
+	border: none !important;
+	outline: none !important;
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace !important;
+	font-size: 14px !important;
+	font-weight: bold !important;
+	line-height: 20px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	vertical-align: middle !important;
+}
+
+/* Override Enyo input styles */
+.hm-terminal-input input {
+	background-color: #000000 !important;
+	color: #00FF00 !important;
+	border: none !important;
+	outline: none !important;
+	font-size: 14px !important;
+	font-weight: bold !important;
+	line-height: 20px !important;
+	vertical-align: middle !important;
+	caret-color: #00FF00;
+}
+
+
+@supports (background: repeating-linear-gradient(black, black)) {
+	.hm-terminal-input {
+		margin-top: 3px !important;
+	}
+}
+
+/* ============================================
+   SCROLLBARS - Retro Style
+   ============================================ */
+
+/* Webkit scrollbar styling */
+.hm-terminal-output-scroller::-webkit-scrollbar {
+	width: 16px;
+	background-color: #FFFFFF;
+}
+
+.hm-terminal-output-scroller::-webkit-scrollbar-thumb {
+	background-color: #000000;
+	border: 2px solid #FFFFFF;
+}
+
+.hm-terminal-output-scroller::-webkit-scrollbar-track {
+	background-color: #CCCCCC;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Blinking cursor effect */
+@keyframes blink {
+	0%, 50% { opacity: 1; }
+	51%, 100% { opacity: 0; }
+}
+
+.hm-cursor-blink {
+	animation: blink 1s step-end infinite;
+}
+
+/* Scanline overlay effect (optional) */
+.hm-scanlines {
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.1),
+		rgba(0, 0, 0, 0.1) 1px,
+		transparent 1px,
+		transparent 2px
+	);
+}
+
+/* ============================================
+   TOUCH ENHANCEMENTS
+   ============================================ */
+
+/* Larger touch targets */
+.hm-window-titlebar {
+	min-height: 28px;
+}
+
+.hm-window-close {
+	width: 13px;
+	height: 13px;
+	top: 50%;
+	left: 8px;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+
+.hm-desktop-icon {
+	padding: 8px;
+}
+
+/* Disable text selection during drag */
+.hm-window-titlebar {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/* Active states for touch feedback */
+.hm-window-close:active {
+	background-color: #000000;
+}
+
+.hm-desktop-icon:active {
+	opacity: 0.7;
+}
