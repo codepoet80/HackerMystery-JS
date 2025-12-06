@@ -1,10 +1,11 @@
 {
-	"id": "com.hackermystery.game",
+	"id": "com.codepoet.hackermystery",
 	"version": "0.1.0",
-	"vendor": "HackerMystery",
+	"vendor": "codepoet",
 	"type": "web",
 	"main": "index.html",
-	"title": "HackerMystery",
+	"title": "Hacker Mystery 95",
 	"icon": "icon.png",
+	"splashicon": "icon-256.png",
 	"uiRevision": 2
 }

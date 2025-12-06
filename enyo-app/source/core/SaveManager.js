@@ -23,7 +23,53 @@ enyo.kind({
 	},
 
 	/**
-	 * Save game state
+	 * Save game synchronously (convenience method)
+	 * @param {number} slot - Save slot number (0-9)
+	 * @returns {boolean} success
+	 */
+	saveGame: function(slot) {
+		slot = slot || 0;
+		var key = HackerMystery.SaveManager.STORAGE_KEY + slot;
+
+		try {
+			var gameState = HackerMystery.GameState.getInstance();
+			var data = gameState.toJSON();
+			data.slot = slot;
+			var dataStr = JSON.stringify(data);
+			localStorage.setItem(key, dataStr);
+			enyo.log("Game saved to slot " + slot);
+			return true;
+		} catch (e) {
+			enyo.error("SaveManager.saveGame error: " + e.message);
+			return false;
+		}
+	},
+
+	/**
+	 * Load game synchronously (convenience method)
+	 * @param {number} slot - Save slot number (0-9)
+	 * @returns {Object|null} save data or null
+	 */
+	loadGame: function(slot) {
+		slot = slot || 0;
+		var key = HackerMystery.SaveManager.STORAGE_KEY + slot;
+
+		try {
+			var dataStr = localStorage.getItem(key);
+			if (dataStr) {
+				var data = JSON.parse(dataStr);
+				enyo.log("Game loaded from slot " + slot);
+				return data;
+			}
+			return null;
+		} catch (e) {
+			enyo.error("SaveManager.loadGame error: " + e.message);
+			return null;
+		}
+	},
+
+	/**
+	 * Save game state (async with callback)
 	 * @param {number} slot - Save slot number (0-9)
 	 * @param {function} callback - Called with (success, error)
 	 */

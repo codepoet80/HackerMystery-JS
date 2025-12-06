@@ -15,8 +15,9 @@ enyo.kind({
 
 	// Icon configuration
 	icons: [
-		{id: "terminal", name: "Terminal", icon: "terminal.png"}
-		// Future icons will be added here
+		{id: "files", name: "Files", icon: "files.png"},
+		{id: "terminal", name: "Terminal", icon: "terminal.png"},
+		{id: "network", name: "Network", icon: "network.png", locked: true}
 	],
 
 	// Track last tap for double-tap detection
@@ -60,10 +61,13 @@ enyo.kind({
 		var now = Date.now();
 		var iconId = inEvent.iconId;
 
+		enyo.log("Desktop.handleIconTap: " + iconId + " (lastTarget=" + this.lastTapTarget + ", elapsed=" + (now - this.lastTapTime) + "ms)");
+
 		// Check for double-tap
 		if (this.lastTapTarget === iconId &&
 			(now - this.lastTapTime) < this.doubleTapDelay) {
 			// Double-tap detected - launch program
+			enyo.log("Desktop: Double-tap detected, launching " + iconId);
 			this.doLaunchProgram({program: iconId});
 			this.lastTapTime = 0;
 			this.lastTapTarget = null;
@@ -115,13 +119,25 @@ enyo.kind({
 		if (this.iconSrc) {
 			this.$.image.applyStyle("background-image", "url(" + this.iconSrc + ")");
 		}
+
+		// Bind click/tap events manually
+		var self = this;
+		var node = this.hasNode();
+		if (node) {
+			node.onclick = function(e) {
+				self.handleTap(e);
+			};
+		}
 	},
 
 	/**
 	 * Handle tap/click on icon
 	 */
-	clickHandler: function(inSender, inEvent) {
+	handleTap: function(inEvent) {
 		this.doIconTap({iconId: this.iconId});
+		if (inEvent) {
+			inEvent.stopPropagation();
+		}
 		return true;
 	}
 });

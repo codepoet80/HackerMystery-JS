@@ -16,7 +16,9 @@ enyo.kind({
 		windowHeight: 300,
 		left: 50,
 		top: 50,
-		contentKind: null
+		contentKind: null,
+		contentOptions: null,
+		onOpenFileHandler: null
 	},
 
 	events: {
@@ -48,17 +50,51 @@ enyo.kind({
 	windowStartX: 0,
 	windowStartY: 0,
 
+	// Reference to the content component
+	contentComponent: null,
+
 	create: function() {
 		this.inherited(arguments);
 		this.$.titleText.setContent(this.title);
 
 		// Create content component if specified
 		if (this.contentKind) {
-			this.$.content.createComponent({
+			// Merge base config with content options
+			var contentConfig = {
 				kind: this.contentKind,
-				owner: this
-			});
+				owner: this,
+				onOpenFile: "handleOpenFile"
+			};
+
+			// Add any content-specific options
+			if (this.contentOptions) {
+				for (var key in this.contentOptions) {
+					if (this.contentOptions.hasOwnProperty(key)) {
+						contentConfig[key] = this.contentOptions[key];
+					}
+				}
+			}
+
+			this.contentComponent = this.$.content.createComponent(contentConfig);
 		}
+	},
+
+	/**
+	 * Get the content component inside this window
+	 */
+	getContentComponent: function() {
+		return this.contentComponent;
+	},
+
+	/**
+	 * Handle file open events from content (e.g., FileViewer)
+	 * Forward to external handler if provided
+	 */
+	handleOpenFile: function(inSender, inEvent) {
+		if (this.onOpenFileHandler) {
+			this.onOpenFileHandler(inSender, inEvent);
+		}
+		return true;
 	},
 
 	rendered: function() {
@@ -92,6 +128,17 @@ enyo.kind({
 	 */
 	setZIndex: function(zIndex) {
 		this.applyStyle("z-index", zIndex);
+	},
+
+	/**
+	 * Set focused state (shows/hides title bar stripes)
+	 */
+	setFocused: function(isFocused) {
+		if (isFocused) {
+			this.addClass("hm-window-focused");
+		} else {
+			this.removeClass("hm-window-focused");
+		}
 	},
 
 	/**

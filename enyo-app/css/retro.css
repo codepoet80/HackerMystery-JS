@@ -21,24 +21,15 @@
    ============================================ */
 
 .hm-desktop {
+	/* Use flex layout, not absolute positioning */
 	width: 100%;
-	height: 100%;
-	background-color: #808080;
-	/* Classic Mac desktop pattern - diagonal lines */
-	background-image:
-		repeating-linear-gradient(
-			45deg,
-			transparent,
-			transparent 2px,
-			#707070 2px,
-			#707070 4px
-		);
-	position: relative;
+	margin-top: 24px;  /* Push below menu bar (22px height + 2px border) */
+	background-color: dimgray;
 }
 
 .hm-desktop-icons {
 	position: absolute;
-	top: 10px;
+	top: 40px;
 	right: 10px;
 	display: block;
 }
@@ -85,6 +76,7 @@
 }
 
 .hm-desktop-icon-label {
+	font-family:Verdana, Geneva, Tahoma, sans-serif;
 	color: #FFFFFF;
 	font-size: 10px;
 	text-shadow: 1px 1px 0 #000000;
@@ -119,10 +111,12 @@
 	border-bottom: 2px solid #000000;
 	position: relative;
 	cursor: move;
+		font-family:Verdana, Geneva, Tahoma, sans-serif;
 }
 
-/* Title bar stripes - GIF for old browsers, gradient for modern */
-.hm-window-titlebar:before {
+/* Title bar stripes - only on focused windows */
+/* GIF for old browsers, gradient for modern */
+.hm-window-focused .hm-window-titlebar:before {
 	content: "";
 	position: absolute;
 	left: 30px;
@@ -137,7 +131,7 @@
 
 /* Modern browsers: override with gradient */
 @supports (background: repeating-linear-gradient(black, black)) {
-	.hm-window-titlebar:before {
+	.hm-window-focused .hm-window-titlebar:before {
 		background-image: repeating-linear-gradient(
 			0deg,
 			transparent,
@@ -352,4 +346,417 @@
 
 .hm-desktop-icon:active {
 	opacity: 0.7;
+}
+
+/* ============================================
+   FILE VIEWER
+   ============================================ */
+
+.hm-fileviewer {
+	width: 100%;
+	height: 100%;
+	background-color: #FFFFFF;
+}
+
+.hm-fileviewer-pathbar {
+	background-color: #EEEEEE;
+	border-bottom: 1px solid #000000;
+	padding: 4px 8px;
+}
+
+.hm-fileviewer-path {
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 11px;
+}
+
+.hm-fileviewer-scroller {
+	background-color: #FFFFFF;
+}
+
+.hm-fileviewer-grid {
+	padding: 10px;
+}
+
+/* File Icons */
+.hm-fileicon {
+	display: inline-block;
+	width: 70px;
+	margin: 5px;
+	text-align: center;
+	vertical-align: top;
+	cursor: pointer;
+}
+
+.hm-fileicon-image {
+	width: 32px;
+	height: 32px;
+	margin: 0 auto 4px auto;
+	background-color: #FFFFFF;
+	border: 1px solid #000000;
+	position: relative;
+}
+
+/* Folder icon */
+.hm-fileicon-folder {
+	background-color: #FFCC00;
+	border: 2px solid #996600;
+}
+
+.hm-fileicon-folder:before {
+	content: "";
+	position: absolute;
+	top: -6px;
+	left: 2px;
+	width: 12px;
+	height: 6px;
+	background-color: #FFCC00;
+	border: 2px solid #996600;
+	border-bottom: none;
+}
+
+/* Parent folder (..) icon */
+.hm-fileicon-parent {
+	background-color: #FFCC00;
+	border: 2px solid #996600;
+}
+
+.hm-fileicon-parent:before {
+	content: "..";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -8px;
+	margin-left: -6px;
+	font-weight: bold;
+	font-size: 14px;
+	color: #996600;
+}
+
+/* Text file icon */
+.hm-fileicon-text {
+	background-color: #FFFFFF;
+}
+
+.hm-fileicon-text:before {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 4px;
+	right: 4px;
+	height: 2px;
+	background-color: #000000;
+	-webkit-box-shadow: 0 4px 0 #000, 0 8px 0 #000, 0 12px 0 #000;
+	box-shadow: 0 4px 0 #000, 0 8px 0 #000, 0 12px 0 #000;
+}
+
+/* Encrypted file icon */
+.hm-fileicon-encrypted {
+	background-color: #FFAAAA;
+	border-color: #990000;
+}
+
+.hm-fileicon-encrypted:before {
+	content: "?";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -10px;
+	margin-left: -5px;
+	font-weight: bold;
+	font-size: 16px;
+	color: #990000;
+}
+
+/* Locked indicator */
+.hm-fileicon-locked {
+	opacity: 0.5;
+}
+
+/* Hidden file indicator */
+.hm-fileicon-hidden {
+	opacity: 0.7;
+}
+
+.hm-fileicon-label {
+	font-size: 10px;
+	word-wrap: break-word;
+	overflow: hidden;
+}
+
+/* Selected state */
+.hm-fileicon-selected {
+	background-color: #000080;
+}
+
+.hm-fileicon-selected .hm-fileicon-label {
+	background-color: #000080;
+	color: #FFFFFF;
+}
+
+/* ============================================
+   TEXT EDITOR
+   ============================================ */
+
+.hm-texteditor {
+	width: 100%;
+	height: 100%;
+	background-color: #FFFFFF;
+}
+
+.hm-texteditor-infobar {
+	background-color: #EEEEEE;
+	border-bottom: 1px solid #000000;
+	padding: 4px 8px;
+}
+
+.hm-texteditor-filename {
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.hm-texteditor-scroller {
+	background-color: #FFFFFF;
+}
+
+.hm-texteditor-content {
+	padding: 8px;
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 12px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+
+.hm-texteditor-error {
+	color: #990000;
+	font-weight: bold;
+}
+
+/* Password prompt for encrypted files */
+.hm-texteditor-password {
+	background-color: #EEEEEE;
+	border-top: 1px solid #000000;
+	padding: 8px;
+	text-align: center;
+}
+
+.hm-texteditor-password-label {
+	font-size: 11px;
+	margin-bottom: 8px;
+}
+
+.hm-texteditor-password-input {
+	width: 150px;
+	margin-right: 8px;
+	font-family: "Monaco", "Menlo", "Consolas", "Courier New", monospace;
+	font-size: 12px;
+}
+
+.hm-texteditor-password-btn {
+	display: inline-block;
+	background-color: #000000;
+	color: #FFFFFF;
+	padding: 4px 8px;
+	cursor: pointer;
+	font-size: 11px;
+}
+
+.hm-texteditor-password-btn:active {
+	background-color: #333333;
+}
+
+.hm-texteditor-password-error {
+	color: #990000;
+	font-size: 11px;
+	margin-top: 8px;
+}
+
+/* ============================================
+   ADDITIONAL DESKTOP ICONS
+   ============================================ */
+
+/* Files icon (for File Viewer) */
+.hm-desktop-icon-files .hm-desktop-icon-image {
+	background-color: #FFCC00;
+	border-color: #996600;
+	position: relative;
+}
+
+.hm-desktop-icon-files .hm-desktop-icon-image:before {
+	content: "";
+	position: absolute;
+	top: -4px;
+	left: 4px;
+	width: 10px;
+	height: 4px;
+	background-color: #FFCC00;
+	border: 1px solid #996600;
+	border-bottom: none;
+}
+
+/* Network icon (locked initially) */
+.hm-desktop-icon-network .hm-desktop-icon-image {
+	background-color: #AAAAAA;
+	position: relative;
+}
+
+.hm-desktop-icon-network .hm-desktop-icon-image:after {
+	content: "X";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -8px;
+	margin-left: -5px;
+	color: #666666;
+	font-family: monospace;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+/* ============================================
+   ALERT MODAL
+   ============================================ */
+
+.hm-alert-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 9999;
+}
+
+.hm-alert-box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 280px;
+	margin-left: -140px;
+	margin-top: -80px;
+	background-color: #FFFFFF;
+	border: 2px solid #000000;
+	box-shadow: 4px 4px 0 #000000;
+	padding: 0;
+}
+
+.hm-alert-title {
+	background-color: #000000;
+	color: #FFFFFF;
+	padding: 8px 12px;
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+}
+
+.hm-alert-message {
+	padding: 16px 12px;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.hm-alert-button {
+	display: block;
+	margin: 0 auto 12px auto;
+	padding: 6px 16px;
+	background-color: #FFFFFF;
+	border: 2px solid #000000;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	text-align: center;
+	width: 80px;
+}
+
+.hm-alert-button:active {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+/* ============================================
+   MENU BAR
+   ============================================ */
+
+.hm-menubar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 22px;
+	background-color: #FFFFFF;
+	border-bottom: 2px solid #000000;
+	z-index: 10000;
+	font-size: 14px;
+	line-height: 22px;
+	font-family: 'Arial Narrow Bold', sans-serif, Impact, Haettenschweiler;
+}
+
+.hm-menubar-appname {
+	display: inline-block;
+	padding: 0 12px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.hm-menubar-appname:hover {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+.hm-menubar-menu {
+	display: inline-block;
+	position: relative;
+	z-index: 10002;
+}
+
+.hm-menubar-menu-title {
+	display: inline-block;
+	padding: 0 12px;
+	cursor: pointer;
+}
+
+.hm-menubar-menu-title:hover {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+.hm-menubar-dropdown {
+	position: absolute;
+	top: 22px;
+	left: 0;
+	min-width: 160px;
+	background-color: #FFFFFF;
+	border: 2px solid #000000;
+	border-top: none;
+	box-shadow: 2px 2px 0 #000000;
+	z-index: 10001;
+}
+
+.hm-menubar-item {
+	padding: 4px 12px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.hm-menubar-item:hover {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+.hm-menubar-separator {
+	height: 1px;
+	background-color: #000000;
+	margin: 4px 0;
+}
+
+.hm-menubar-overlay {
+	position: fixed;
+	top: 22px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: transparent;
+	z-index: 9999;
 }

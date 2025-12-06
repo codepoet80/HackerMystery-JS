@@ -15,6 +15,10 @@ enyo.kind({
 	baseZIndex: 100,
 	windowOffset: 30,  // Cascade offset for new windows
 
+	events: {
+		onWindowFocused: ""
+	},
+
 	create: function() {
 		this.inherited(arguments);
 		this.windows = [];
@@ -27,19 +31,27 @@ enyo.kind({
 	 * @param {string} config.kind - Component kind for window content
 	 * @param {number} config.width - Window width in pixels
 	 * @param {number} config.height - Window height in pixels
+	 * @param {Object} config.contentOptions - Options to pass to content component
+	 * @param {Function} config.onOpenFile - Handler for file open events
 	 */
 	openWindow: function(config) {
 		var windowId = "window_" + this.nextWindowId++;
 		var windowCount = this.windows.length;
 
-		// Calculate position with cascade offset
-		var left = 50 + (windowCount * this.windowOffset);
-		var top = 50 + (windowCount * this.windowOffset);
+		// Use custom position if provided, otherwise calculate cascade offset
+		var left, top;
+		if (config.left !== undefined && config.top !== undefined) {
+			left = config.left;
+			top = config.top;
+		} else {
+			left = 50 + (windowCount * this.windowOffset);
+			top = 50 + (windowCount * this.windowOffset);
 
-		// Wrap around if too many windows
-		if (left > 300) {
-			left = 50 + ((windowCount % 5) * this.windowOffset);
-			top = 50 + ((windowCount % 5) * this.windowOffset);
+			// Wrap around if too many windows
+			if (left > 300) {
+				left = 50 + ((windowCount % 5) * this.windowOffset);
+				top = 50 + ((windowCount % 5) * this.windowOffset);
+			}
 		}
 
 		var windowComponent = this.createComponent({
@@ -52,6 +64,8 @@ enyo.kind({
 			left: left,
 			top: top,
 			contentKind: config.kind,
+			contentOptions: config.contentOptions || {},
+			onOpenFileHandler: config.onOpenFile,
 			onClose: "handleWindowClose",
 			onFocus: "handleWindowFocus"
 		});
@@ -83,6 +97,12 @@ enyo.kind({
 			var windowInfo = this.windows[index];
 			windowInfo.component.destroy();
 			this.windows.splice(index, 1);
+
+			// Focus the new topmost window if any remain
+			if (this.windows.length > 0) {
+				var topWindow = this.windows[this.windows.length - 1];
+				topWindow.component.setFocused(true);
+			}
 		}
 	},
 
@@ -104,10 +124,12 @@ enyo.kind({
 			this.windows.push(windowInfo);
 		}
 
-		// Update z-indices
+		// Update z-indices and focus state
 		for (var j = 0; j < this.windows.length; j++) {
 			var zIndex = this.baseZIndex + j;
+			var isFocused = (j === this.windows.length - 1);
 			this.windows[j].component.setZIndex(zIndex);
+			this.windows[j].component.setFocused(isFocused);
 		}
 	},
 
@@ -123,5 +145,16 @@ enyo.kind({
 	 */
 	handleWindowFocus: function(inSender, inEvent) {
 		this.bringToFront(inEvent.windowId);
+
+		// Find the window component and notify App about focus change
+		var windowComponent = inSender;
+		var content = windowComponent.getContentComponent ? windowComponent.getContentComponent() : null;
+		var contentKind = windowComponent.contentKind || null;
+
+		this.doWindowFocused({
+			window: windowComponent,
+			content: content,
+			contentKind: contentKind
+		});
 	}
 });
