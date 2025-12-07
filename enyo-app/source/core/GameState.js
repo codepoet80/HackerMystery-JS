@@ -50,7 +50,16 @@ enyo.kind({
 	 * Set a game flag
 	 */
 	setFlag: function(key, value) {
+		var oldValue = this.flags[key];
 		this.flags[key] = value;
+
+		// Notify puzzle engine of flag change
+		if (value !== oldValue && HackerMystery.PuzzleEngine) {
+			var puzzleEngine = HackerMystery.PuzzleEngine.getInstance();
+			if (puzzleEngine) {
+				puzzleEngine.onFlagChanged(key, value);
+			}
+		}
 	},
 
 	/**

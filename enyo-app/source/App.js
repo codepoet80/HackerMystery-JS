@@ -54,12 +54,40 @@ enyo.kind({
 
 		// Initialize filesystem
 		HackerMystery.FileSystem.getInstance();
+
+		// Initialize puzzle engine and listen for completions
+		var self = this;
+		var puzzleEngine = HackerMystery.PuzzleEngine.getInstance();
+		puzzleEngine.addListener(function(puzzle) {
+			self.onPuzzleComplete(puzzle);
+		});
 	},
 
 	rendered: function() {
 		this.inherited(arguments);
+
+		// Update initial score display
+		this.updateScoreDisplay();
+
 		// Auto-launch terminal on startup for that authentic hacker feel
 		this.launchProgram("terminal");
+	},
+
+	/**
+	 * Called when a puzzle is completed
+	 */
+	onPuzzleComplete: function(puzzle) {
+		enyo.log("Puzzle completed: " + puzzle.name);
+		this.updateScoreDisplay();
+	},
+
+	/**
+	 * Update the score display in the menu bar
+	 */
+	updateScoreDisplay: function() {
+		var puzzleEngine = HackerMystery.PuzzleEngine.getInstance();
+		var progress = puzzleEngine.getChapterProgress(1);
+		this.$.menuBar.updateScore(progress.completed, progress.total);
 	},
 
 	/**

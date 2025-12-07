@@ -72,6 +72,22 @@ enyo.kind({
 				}
 			]
 		},
+		// Score counter (right side)
+		{name: "scoreMenu", kind: enyo.Control, className: "hm-menubar-score-menu",
+			components: [
+				{name: "scoreDisplay", kind: enyo.Control, className: "hm-menubar-score",
+					content: "0", menuName: "score"
+				},
+				{name: "scoreDropdown", kind: enyo.Control, className: "hm-menubar-dropdown hm-menubar-dropdown-right",
+					showing: false,
+					components: [
+						{name: "scoreLabel", kind: enyo.Control, className: "hm-menubar-item hm-menubar-item-disabled",
+							content: "Hacked 0 of 0 puzzles"
+						}
+					]
+				}
+			]
+		},
 		// Invisible overlay to catch clicks outside menus
 		{name: "menuOverlay", kind: enyo.Control, className: "hm-menubar-overlay",
 			showing: false
@@ -112,6 +128,9 @@ enyo.kind({
 		});
 		bindClick(this.$.viewMenuTitle.hasNode(), function() {
 			self.toggleMenuByName("view");
+		});
+		bindClick(this.$.scoreDisplay.hasNode(), function() {
+			self.toggleMenuByName("score");
 		});
 
 		// Bind menu item clicks
@@ -174,6 +193,8 @@ enyo.kind({
 			dropdown = this.$.fileMenuDropdown;
 		} else if (menuName === "view") {
 			dropdown = this.$.viewMenuDropdown;
+		} else if (menuName === "score") {
+			dropdown = this.$.scoreDropdown;
 		}
 
 		if (!dropdown) return;
@@ -206,8 +227,19 @@ enyo.kind({
 		this.$.appMenuDropdown.setShowing(false);
 		this.$.fileMenuDropdown.setShowing(false);
 		this.$.viewMenuDropdown.setShowing(false);
+		this.$.scoreDropdown.setShowing(false);
 		this.$.menuOverlay.setShowing(false);
 		this.openMenu = null;
 		return true;
+	},
+
+	/**
+	 * Update the score display
+	 * @param {number} completed - Number of puzzles completed
+	 * @param {number} total - Total number of puzzles
+	 */
+	updateScore: function(completed, total) {
+		this.$.scoreDisplay.setContent(completed.toString());
+		this.$.scoreLabel.setContent("Hacked " + completed + " of " + total + " puzzles");
 	}
 });

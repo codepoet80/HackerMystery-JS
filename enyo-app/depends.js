@@ -6,9 +6,12 @@ enyo.depends(
 	// Core systems
 	"source/core/GameState.js",
 	"source/core/SaveManager.js",
+	"source/core/PuzzleEngine.js",
+	"source/core/BBSHandler.js",
 
 	// Data
 	"source/data/FileSystem.js",
+	"source/data/BBSData.js",
 
 	// UI components
 	"source/ui/MenuBar.js",

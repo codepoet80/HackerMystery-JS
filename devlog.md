@@ -257,19 +257,104 @@ enyo-app/
 
 ## Milestone 3: Puzzle Foundation
 
-**Status:** Not Started
+**Status:** Complete
+**Date:** December 7, 2024
 
-### Planned Features
-- Puzzle Engine (`source/core/PuzzleEngine.js`)
-  - Register puzzles with triggers
-  - Check completion conditions
-  - Fire events on puzzle state changes
-- First password puzzle (encrypted file already in filesystem)
-- Email Client (`source/programs/EmailClient.js`)
-  - Inbox list view
-  - Message detail view
-  - Story delivery mechanism
-- Story content for Chapter 1 completion
+### Features Implemented
+
+#### Puzzle Engine (`source/core/PuzzleEngine.js`)
+- Singleton pattern for global access
+- Puzzle states: `locked`, `available`, `completed`
+- Register puzzles with:
+  - Required flags (prerequisites)
+  - Completion flags (triggers)
+  - Rewards (flags to set, puzzles to unlock)
+- Event system for puzzle completion listeners
+- Chapter progress tracking
+- Auto-completion chains (completing one puzzle can unlock others)
+
+#### Chapter 1 Puzzles Registered
+| Puzzle ID | Name | Trigger |
+|-----------|------|---------|
+| `decrypt_secrets` | Too Many Secrets | Decrypt the encrypted file |
+| `find_acid_burn` | Finding Acid Burn | Contact Acid Burn on BBS |
+| `chapter1_complete` | Chapter 1 Complete | Gain Acid Burn's trust |
+
+#### BBS System (Terminal-based)
+Instead of a separate Email Client, email is integrated into the BBS systems accessed via the terminal - true to the 1995 experience.
+
+**BBSData** (`source/data/BBSData.js`)
+- Data definitions for all BBS systems
+- Message boards with conditional visibility
+- Email system with flag-based message unlocking
+- Reply system with trigger words
+
+**BBSHandler** (`source/core/BBSHandler.js`)
+- Session state machine (password, main menu, boards, email, etc.)
+- Menu navigation (boards, email, who's online, help)
+- Message board browsing
+- Email inbox with read/unread tracking
+- Reply composition with trigger-word detection
+- Automatic flag setting on story progression
+
+#### BBS Systems
+| Phone | Name | Status | Notes |
+|-------|------|--------|-------|
+| 555-0199 | The Underground | Active | Password protected, main story BBS |
+| 555-0134 | CyberDen | Banned | Player is banned |
+| 555-2176 | PhreakHole | Dead | Shut down by feds |
+| 555-0200 | The Gibson Files | Locked | Future content |
+
+#### Terminal Updates
+- New commands: `dial <number>`, `hangup`
+- BBS session routing (input goes to BBSHandler when connected)
+- Password prompt mode
+- "Press any key" handling for menus
+
+#### TextEditor Integration
+- Notifies PuzzleEngine when files are decrypted
+- Consistent flag naming (strips file extension)
+
+### Story Progression (Chapter 1 Complete)
+1. Player explores filesystem, finds hints about BBS
+2. Discovers password "hackers" in trash folder
+3. Decrypts `too_many_secrets.enc` - learns about GIBSON
+4. Uses terminal: `dial 555-0199` to connect to The Underground
+5. Enters password "hackers"
+6. Checks Email - finds message from Acid Burn
+7. Replies with "GIBSON" to prove legitimacy
+8. Gains Acid Burn's trust, unlocks Elite board
+9. Chapter 1 complete!
+
+### Updated File Structure
+```
+enyo-app/
+├── source/
+│   ├── App.js
+│   ├── core/
+│   │   ├── GameState.js
+│   │   ├── SaveManager.js
+│   │   ├── PuzzleEngine.js    # NEW: Puzzle management
+│   │   └── BBSHandler.js      # NEW: BBS session handler
+│   ├── data/
+│   │   ├── FileSystem.js
+│   │   └── BBSData.js         # NEW: BBS content data
+│   ├── programs/
+│   │   ├── FileViewer.js
+│   │   └── TextEditor.js      # Updated: PuzzleEngine integration
+│   └── ui/
+│       ├── Desktop.js
+│       ├── MenuBar.js
+│       ├── Window.js
+│       ├── WindowManager.js
+│       └── Terminal.js        # Updated: BBS commands
+```
+
+### New Terminal Commands
+| Command | Description |
+|---------|-------------|
+| dial [number] | Dial a BBS (e.g., dial 555-0199) |
+| hangup | Disconnect from current BBS |
 
 ---
 

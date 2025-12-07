@@ -168,9 +168,12 @@ enyo.kind({
 				this.showContent(this.fileData.content);
 			}
 
-			// Set game flag for decrypting this file
+			// Set game flag for decrypting this file (GameState.setFlag automatically notifies PuzzleEngine)
 			var gameState = HackerMystery.GameState.getInstance();
-			gameState.setFlag("decrypted_" + this.fileName, true);
+
+			// Create flag without file extension
+			var flagName = "decrypted_" + this.fileName.replace(/\.[^.]+$/, "");
+			gameState.setFlag(flagName, true);
 
 			// Special flag for the secrets file
 			if (this.fileName === "too_many_secrets.enc") {

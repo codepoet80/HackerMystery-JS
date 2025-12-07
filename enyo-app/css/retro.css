@@ -760,3 +760,37 @@
 	background: transparent;
 	z-index: 9999;
 }
+
+/* Score counter (right side of menu bar) */
+.hm-menubar-score-menu {
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 10002;
+}
+
+.hm-menubar-score {
+	display: inline-block;
+	padding: 0 12px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.hm-menubar-score:hover {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+.hm-menubar-dropdown-right {
+	left: auto;
+	right: 0;
+}
+
+.hm-menubar-item-disabled {
+	cursor: default;
+}
+
+.hm-menubar-item-disabled:hover {
+	background-color: #FFFFFF;
+	color: #000000;
+}

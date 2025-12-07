@@ -22,6 +22,10 @@ enyo.kind({
 	// Built-in commands
 	commands: null,
 
+	// BBS session state
+	bbsConnected: false,
+	bbsWaitingForKey: false,
+
 	components: [
 		// Output area
 		{name: "outputScroller", kind: enyo.Scroller, flex: 1,
@@ -119,6 +123,49 @@ enyo.kind({
 					return "HackerMystery Terminal v0.1\n" +
 						"A conspiracy lurks in the shadows...\n" +
 						"Type 'help' for available commands.";
+				}
+			},
+			dial: {
+				description: "Dial a BBS (e.g., dial 555-2638)",
+				handler: function(args) {
+					if (args.length === 0) {
+						return "Usage: dial <phone-number>\n" +
+							"Example: dial 555-2638";
+					}
+					var phoneNumber = args.join("");
+
+					// Check for proper phone number format (must contain a dash)
+					if (phoneNumber.indexOf("-") === -1) {
+						return "Invalid phone number format.\n" +
+							"Please use format: XXX-XXXX\n" +
+							"Example: dial 555-2638";
+					}
+
+					var bbsHandler = HackerMystery.BBSHandler.getInstance();
+					var result = bbsHandler.dial(phoneNumber, self);
+
+					if (result.success) {
+						self.bbsConnected = true;
+						if (result.needsInput) {
+							// Password prompt - change terminal prompt
+							self.$.prompt.setContent(">");
+						}
+					}
+
+					return result.message;
+				}
+			},
+			hangup: {
+				description: "Disconnect from current BBS",
+				handler: function(args) {
+					var bbsHandler = HackerMystery.BBSHandler.getInstance();
+					if (!bbsHandler.isConnected()) {
+						return "Not connected to any BBS.";
+					}
+					var result = bbsHandler.disconnect();
+					self.bbsConnected = false;
+					self.$.prompt.setContent(">");
+					return result.message;
 				}
 			}
 		};
@@ -304,6 +351,44 @@ enyo.kind({
 	 * Execute a command string
 	 */
 	executeCommand: function(input) {
+		var bbsHandler = HackerMystery.BBSHandler.getInstance();
+
+		// If waiting for any key, any input continues
+		if (this.bbsWaitingForKey) {
+			this.bbsWaitingForKey = false;
+			this.$.prompt.setContent(">");
+			var result = bbsHandler.handleInput("");
+			if (result.message) {
+				this.println(result.message);
+			}
+			if (result.disconnected) {
+				this.bbsConnected = false;
+				this.$.prompt.setContent(">");
+			}
+			return;
+		}
+
+		// If connected to BBS, route input to BBS handler
+		if (bbsHandler.isConnected()) {
+			var result = bbsHandler.handleInput(input);
+
+			if (result.message) {
+				this.println(result.message);
+			}
+
+			if (result.disconnected) {
+				this.bbsConnected = false;
+				this.$.prompt.setContent(">");
+			} else if (result.waitForKey) {
+				this.bbsWaitingForKey = true;
+			} else {
+				// Update prompt based on state
+				this.$.prompt.setContent(">");
+			}
+			return;
+		}
+
+		// Normal command processing
 		var parts = input.split(/\s+/);
 		var cmd = parts[0].toLowerCase();
 		var args = parts.slice(1);
