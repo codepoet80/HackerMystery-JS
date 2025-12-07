@@ -55,6 +55,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.history = [];
 		this.typewriterQueue = [];
+		this.dialingInProgress = false;
 		this.initCommands();
 	},
 
@@ -141,18 +142,49 @@ enyo.kind({
 							"Example: dial 555-2638";
 					}
 
-					var bbsHandler = HackerMystery.BBSHandler.getInstance();
-					var result = bbsHandler.dial(phoneNumber, self);
+					// Check if this number exists to determine which sound to play
+					var bbsData = HackerMystery.BBSData.getInstance();
+					var bbs = bbsData.getBBS(phoneNumber);
+					// Use BBS-specific dial sound, or dialup-fail.mp3 for unknown numbers
+					var dialSound = bbs ? (bbs.dialSound || "dialup-fail.mp3") : "dialup-fail.mp3";
 
-					if (result.success) {
-						self.bbsConnected = true;
-						if (result.needsInput) {
-							// Password prompt - change terminal prompt
-							self.$.prompt.setContent(">");
+					// Disable input while dialing
+					self.dialingInProgress = true;
+					self.$.input.setDisabled(true);
+
+					// Play dialup sound and wait for it to finish
+					var soundManager = HackerMystery.SoundManager.getInstance();
+					soundManager.play(dialSound, {
+						onEnded: function() {
+							// Sound finished, now actually connect
+							var bbsHandler = HackerMystery.BBSHandler.getInstance();
+							var result = bbsHandler.dial(phoneNumber, self);
+
+							if (result.success) {
+								self.bbsConnected = true;
+								if (result.needsInput) {
+									// Password prompt
+									self.$.prompt.setContent(">");
+								}
+
+								// Play connect sound if specified (e.g., victory sound)
+								if (bbs && bbs.connectSound) {
+									soundManager.play(bbs.connectSound);
+								}
+							}
+
+							// Print the connection result
+							self.println(result.message);
+
+							// Re-enable input
+							self.dialingInProgress = false;
+							self.$.input.setDisabled(false);
+							self.focusInput();
 						}
-					}
+					});
 
-					return result.message;
+					// Return initial dialing message
+					return "Dialing " + phoneNumber + "...";
 				}
 			},
 			hangup: {
@@ -328,6 +360,12 @@ enyo.kind({
 	 * Execute the current input command
 	 */
 	executeCurrentInput: function() {
+		// Ignore input while dialing
+		if (this.dialingInProgress) {
+			this.$.input.setValue("");
+			return;
+		}
+
 		var input = this.$.input.getValue().trim();
 		this.$.input.setValue("");
 

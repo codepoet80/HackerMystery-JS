@@ -55,6 +55,9 @@ enyo.kind({
 		// Initialize filesystem
 		HackerMystery.FileSystem.getInstance();
 
+		// Initialize sound manager (preloads sounds)
+		HackerMystery.SoundManager.getInstance();
+
 		// Initialize puzzle engine and listen for completions
 		var self = this;
 		var puzzleEngine = HackerMystery.PuzzleEngine.getInstance();
@@ -78,7 +81,19 @@ enyo.kind({
 	 */
 	onPuzzleComplete: function(puzzle) {
 		enyo.log("Puzzle completed: " + puzzle.name);
+
+		// Update score first (critical)
 		this.updateScoreDisplay();
+
+		// Play success sound (non-critical, wrapped in try-catch)
+		try {
+			var soundManager = HackerMystery.SoundManager.getInstance();
+			if (soundManager) {
+				soundManager.play("success.mp3");
+			}
+		} catch (e) {
+			enyo.warn("Error playing success sound: " + e);
+		}
 	},
 
 	/**

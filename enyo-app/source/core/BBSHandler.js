@@ -27,7 +27,8 @@ enyo.kind({
 		STATE_EMAIL: "email",
 		STATE_READING_EMAIL: "reading_email",
 		STATE_COMPOSING: "composing",
-		STATE_COMPOSING_BOARD: "composing_board"
+		STATE_COMPOSING_BOARD: "composing_board",
+		STATE_STATIC_MESSAGE: "static_message"
 	},
 
 	// Current session
@@ -46,6 +47,9 @@ enyo.kind({
 
 	// Flag to show new mail notification
 	hasNewMail: false,
+
+	// Flag to show new board message notification
+	hasNewBoardMessage: false,
 
 	create: function() {
 		this.inherited(arguments);
@@ -83,8 +87,17 @@ enyo.kind({
 			};
 		}
 
-		// Check if BBS is active
-		if (!bbs.active) {
+		// Check if BBS requires a flag to access
+		var gameState = HackerMystery.GameState.getInstance();
+		if (bbs.requiresFlag && !gameState.getFlag(bbs.requiresFlag)) {
+			return {
+				success: false,
+				message: bbs.lockedMessage ? bbs.lockedMessage.join("\n") : "NO CARRIER"
+			};
+		}
+
+		// Check if BBS is active (requiresFlag can override inactive status)
+		if (!bbs.active && !bbs.requiresFlag) {
 			return {
 				success: false,
 				message: bbs.deadMessage ? bbs.deadMessage.join("\n") : "NO CARRIER"
@@ -99,19 +112,18 @@ enyo.kind({
 			};
 		}
 
-		// Check if BBS requires a flag
-		if (bbs.requiresFlag) {
-			var gameState = HackerMystery.GameState.getInstance();
-			if (!gameState.getFlag(bbs.requiresFlag)) {
-				return {
-					success: false,
-					message: bbs.lockedMessage ? bbs.lockedMessage.join("\n") : "NO CARRIER"
-				};
-			}
-		}
-
 		// Start connection
 		this.currentBBS = bbs;
+
+		// Check if BBS has a static message (e.g., chapter ending)
+		if (bbs.staticMessage) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_STATIC_MESSAGE;
+			return {
+				success: true,
+				message: bbs.staticMessage.join("\n"),
+				waitForKey: true
+			};
+		}
 
 		// Check if password required
 		if (bbs.password) {
@@ -161,7 +173,12 @@ enyo.kind({
 			""
 		];
 
-		menu.push("  [B] Message Boards");
+		// Show new board message indicator
+		if (this.hasNewBoardMessage) {
+			menu.push("  [B] Message Boards  (New Reply!)");
+		} else {
+			menu.push("  [B] Message Boards");
+		}
 
 		// Show new mail indicator
 		if (this.hasNewMail) {
@@ -215,6 +232,10 @@ enyo.kind({
 			case HackerMystery.BBSHandler.STATE_COMPOSING_BOARD:
 				return this.handleComposingBoard(input);
 
+			case HackerMystery.BBSHandler.STATE_STATIC_MESSAGE:
+				// Any input disconnects
+				return this.disconnect();
+
 			default:
 				return { message: "ERROR: Unknown state" };
 		}
@@ -224,7 +245,14 @@ enyo.kind({
 	 * Handle password entry
 	 */
 	handlePassword: function(input) {
-		if (input.toLowerCase() === this.currentBBS.password.toLowerCase()) {
+		var enteredPassword = input.toLowerCase();
+		var correctPassword = this.currentBBS.password.toLowerCase();
+
+		// Accept both singular and plural forms (e.g., "hacker" and "hackers")
+		var passwordMatch = (enteredPassword === correctPassword) ||
+			(correctPassword === "hackers" && enteredPassword === "hacker");
+
+		if (passwordMatch) {
 			this.sessionState = HackerMystery.BBSHandler.STATE_MAIN_MENU;
 			return {
 				message: "\nAccess granted!\n\n" + this.getConnectMessage()
@@ -294,6 +322,7 @@ enyo.kind({
 			var boardCount = this.pendingBoardReplies.length;
 			notifications.push("*** " + boardCount + " new board post" + (boardCount > 1 ? "s" : "") + " ***");
 			this.pendingBoardReplies = [];
+			this.hasNewBoardMessage = true;
 		}
 
 		// Deliver pending emails
@@ -339,6 +368,9 @@ enyo.kind({
 	 */
 	showBoards: function() {
 		this.sessionState = HackerMystery.BBSHandler.STATE_BOARDS;
+
+		// Clear new board message indicator
+		this.hasNewBoardMessage = false;
 
 		var lines = [
 			"",
@@ -463,10 +495,19 @@ enyo.kind({
 		this.sessionState = HackerMystery.BBSHandler.STATE_READING_MESSAGE;
 		this.currentMessage = msg;
 
-		// Handle onRead trigger (queue email when message is read)
+		// Handle onRead trigger (queue email or set flags when message is read)
 		if (msg.onRead && !msg.onReadTriggered) {
 			msg.onReadTriggered = true;
 
+			// Set flags if specified
+			if (msg.onRead.setsFlags) {
+				var gameState = HackerMystery.GameState.getInstance();
+				for (var i = 0; i < msg.onRead.setsFlags.length; i++) {
+					gameState.setFlag(msg.onRead.setsFlags[i], true);
+				}
+			}
+
+			// Queue email if specified
 			if (msg.onRead.queueEmail) {
 				var emailData = msg.onRead.queueEmail;
 				var responseEmail = {
@@ -702,6 +743,11 @@ enyo.kind({
 			return this.returnToMainMenu();
 		}
 
+		if (input.toUpperCase() === "B") {
+			// Redisplay email list
+			return this.showEmail();
+		}
+
 		var msgNum = parseInt(input, 10);
 		if (isNaN(msgNum) || msgNum < 1 || msgNum > this._currentEmails.length) {
 			return { message: "Invalid choice. Enter a message # or M: " };
@@ -718,6 +764,18 @@ enyo.kind({
 	showEmailMessage: function(email) {
 		this.sessionState = HackerMystery.BBSHandler.STATE_READING_EMAIL;
 		this.currentEmail = email;
+
+		// Handle onRead trigger (set flags when email is read)
+		if (email.onRead && !email.onReadTriggered) {
+			email.onReadTriggered = true;
+
+			if (email.onRead.setsFlags) {
+				var gameState = HackerMystery.GameState.getInstance();
+				for (var i = 0; i < email.onRead.setsFlags.length; i++) {
+					gameState.setFlag(email.onRead.setsFlags[i], true);
+				}
+			}
+		}
 
 		var lines = [
 			"",
@@ -799,12 +857,12 @@ enyo.kind({
 		}
 
 		if (matchedReply) {
-			// Apply flags from the reply (GameState.setFlag automatically notifies PuzzleEngine)
-			if (matchedReply.response.setsFlags) {
+			// Apply flags from sending the reply (GameState.setFlag automatically notifies PuzzleEngine)
+			if (matchedReply.setsFlags) {
 				var gameState = HackerMystery.GameState.getInstance();
 
-				for (var j = 0; j < matchedReply.response.setsFlags.length; j++) {
-					var flag = matchedReply.response.setsFlags[j];
+				for (var j = 0; j < matchedReply.setsFlags.length; j++) {
+					var flag = matchedReply.setsFlags[j];
 					gameState.setFlag(flag, true);
 				}
 			}
@@ -817,7 +875,8 @@ enyo.kind({
 				subject: matchedReply.response.subject,
 				read: false,
 				body: matchedReply.response.body,
-				replies: []  // No further replies on response emails
+				replies: [],  // No further replies on response emails
+				onRead: matchedReply.response.onRead || null  // Preserve onRead trigger
 			};
 			this.queueEmailReply(responseEmail);
 

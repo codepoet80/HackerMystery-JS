@@ -8,6 +8,7 @@ enyo.depends(
 	"source/core/SaveManager.js",
 	"source/core/PuzzleEngine.js",
 	"source/core/BBSHandler.js",
+	"source/core/SoundManager.js",
 
 	// Data
 	"source/data/FileSystem.js",

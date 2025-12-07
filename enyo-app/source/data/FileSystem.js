@@ -73,7 +73,8 @@ enyo.kind({
 								created: "1995-03-12",
 								locked: true,
 								unlockFlag: "found_contacts_hint",
-								content: this.getContactsContent()
+								content: this.getContactsContent(),
+								onReadFlag: "knows_gibson_number"
 							}
 						}
 					},
@@ -244,8 +245,10 @@ enyo.kind({
 			"Cereal Killer  - Info broker",
 			"               - Unreliable but connected",
 			"",
-			"The Underground BBS: 555-0199",
-			"Access Password: See encrypted file",
+			"Crash Override - Newbie hacker",
+			"               - Plays well with others",
+			"               - Just got a new job...",
+			"               - modem: 555-0200",
 			""
 		].join("\n");
 	},
@@ -508,7 +511,8 @@ enyo.kind({
 			name: node.name,
 			encrypted: node.type === "encrypted",
 			password: node.password || null,
-			decryptedContent: node.decryptedContent || null
+			decryptedContent: node.decryptedContent || null,
+			onReadFlag: node.onReadFlag || null
 		};
 	},
 

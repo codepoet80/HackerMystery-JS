@@ -6,6 +6,6 @@ This is my first attempt at a game! I honestly wouldn't be able to do this witho
 
 Its written in a legacy Javascript framework, called enyo, because it's being developed as a new game for Palm/HP's defuct webOS mobile platform -- while still retaining compatibility with newer browsers.
 
-I've used Claude for light professional coding -- mostly acceleration of grunt work -- but this is my first time letting the AI really doing most of the work, and its really a lot of fun. The game is intended to be a mystery, but just like the user, neither Claude nor I know exactly what's going to happen: AI hallucinations + human creativity == who knows...?
+I've used Claude at work for light coding duties (mostly acceleration of grunt work) but this is my first time letting the AI really do most of the work, and the randomness makes it a lot of fun! The game is intended to be a mystery, but just like the user, neither Claude nor I know exactly what's going to happen: AI hallucinations + human creativity == who knows...?
 
 Follow along with our work in [devlog.md](devlog.md), if you'd like!

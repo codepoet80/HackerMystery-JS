@@ -53,6 +53,7 @@ enyo.kind({
 			password: "hackers",
 			sysop: "Ginsberg",
 			active: true,
+			dialSound: "dialup.mp3",
 			welcomeArt: [
 				"The",
 				" _     _      ____  _____ ____       ",
@@ -142,6 +143,7 @@ enyo.kind({
 											replies: [
 												{
 													trigger: "gibson",
+													setsFlags: ["contacted_acid_burn"],
 													response: {
 														from: "Acid Burn",
 														subject: "RE: Private message",
@@ -167,7 +169,9 @@ enyo.kind({
 															"",
 															"- Acid Burn"
 														],
-														setsFlags: ["acid_burn_trusts_player", "contacted_acid_burn"]
+														onRead: {
+															setsFlags: ["acid_burn_trusts_player"]
+														}
 													}
 												}
 											]
@@ -210,8 +214,17 @@ enyo.kind({
 								"We need proof before we can act.",
 								"I've got a contact on the inside.",
 								"",
-								"The story will continue soon..."
-							]
+								"Check your local files. I heard you",
+								"keep a contacts list in your documents",
+								"folder. My inside person is there.",
+								"",
+								"Look for the one who \"plays well",
+								"with others.\" They're our way in.",
+								""
+							],
+							onRead: {
+								setsFlags: ["found_contacts_hint"]
+							}
 						}
 					]
 				}
@@ -236,6 +249,7 @@ enyo.kind({
 			sysop: "Unknown",
 			active: true,
 			banned: true,
+			dialSound: "dialup.mp3",  // Connects but then shows banned message
 			banMessage: [
 				"",
 				"================================",
@@ -249,7 +263,8 @@ enyo.kind({
 				"this is an error.",
 				"",
 				"(It's not an error.)",
-				""
+				"",
+				"NO CARRIER"
 			]
 		};
 	},
@@ -263,6 +278,7 @@ enyo.kind({
 			name: "PhreakHole",
 			phoneNumber: "555-2176",
 			active: false,
+			dialSound: "dialup-noservice.mp3",  // Disconnected number
 			deadMessage: [
 				"",
 				"NO CARRIER",
@@ -285,6 +301,8 @@ enyo.kind({
 			password: null,
 			sysop: "???",
 			active: false,
+			dialSound: "dialup.mp3",
+			connectSound: "victory.mp3",  // Chapter 1 victory!
 			requiresFlag: "knows_gibson_number",
 			lockedMessage: [
 				"",
@@ -294,6 +312,28 @@ enyo.kind({
 				"NO CARRIER",
 				"",
 				"[Connection refused]",
+				""
+			],
+			// Chapter 1 ending - shows static message instead of menu
+			staticMessage: [
+				"",
+				"CONNECT 2400",
+				"",
+				"================================",
+				"    THE GIBSON FILES",
+				"================================",
+				"",
+				"  End of Chapter 1",
+				"",
+				"  Congratulations!",
+				"",
+				"  Acid Burn and Crash Override",
+				"  will be back soon for",
+				"  Chapter 2.",
+				"",
+				"================================",
+				"",
+				"[Press any key to disconnect]",
 				""
 			]
 		};

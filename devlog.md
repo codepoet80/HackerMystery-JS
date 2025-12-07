@@ -15,7 +15,7 @@ A 1990s hacker-themed adventure game with a hybrid terminal/windowed interface r
 
 ---
 
-## Milestone 1: Playable Shell
+## Milestone 1: Playable Shell (12/6/2025)
 
 **Status:** Complete
 **Date:** December 6, 2024
@@ -118,7 +118,7 @@ enyo-app/
 
 ---
 
-## Milestone 2: Core Programs
+## Milestone 2: Core Programs (12/6/2025)
 
 **Status:** Complete
 **Date:** December 6, 2024
@@ -255,7 +255,7 @@ enyo-app/
 
 ---
 
-## Milestone 3: Puzzle Foundation
+## Milestone 3: Puzzle Foundation  (12/7/2025)
 
 **Status:** Complete
 **Date:** December 7, 2024
@@ -318,13 +318,19 @@ Instead of a separate Email Client, email is integrated into the BBS systems acc
 ### Story Progression (Chapter 1 Complete)
 1. Player explores filesystem, finds hints about BBS
 2. Discovers password "hackers" in trash folder
-3. Decrypts `too_many_secrets.enc` - learns about GIBSON
+3. Decrypts `too_many_secrets.enc` - learns about GIBSON → **Puzzle 1: Too Many Secrets**
 4. Uses terminal: `dial 555-0199` to connect to The Underground
 5. Enters password "hackers"
-6. Checks Email - finds message from Acid Burn
-7. Replies with "GIBSON" to prove legitimacy
-8. Gains Acid Burn's trust, unlocks Elite board
-9. Chapter 1 complete!
+6. Reads Acid Burn's message on General board
+7. Replies to Acid Burn on board → **Puzzle 2: First Contact**
+8. Returns to main menu, gets new email notification
+9. Reads email from Acid Burn asking about what player found
+10. Replies mentioning "gibson" → **Puzzle 3: Prove Yourself**
+11. Returns to main menu, checks email again
+12. Reads Acid Burn's response about trusting player → **Puzzle 4: Trusted Hacker**
+13. Goes to Boards, Elite Section now visible
+14. Reads Acid Burn's message about inside contact → **Puzzle 5: Inside Information**
+15. Reads unlocked `contacts.txt` file → Sets `knows_gibson_number` flag for Chapter 2
 
 ### Updated File Structure
 ```
@@ -355,6 +361,122 @@ enyo-app/
 |---------|-------------|
 | dial [number] | Dial a BBS (e.g., dial 555-0199) |
 | hangup | Disconnect from current BBS |
+
+#### Score Counter (Menu Bar)
+- Displays puzzle completion count in top-right of menu bar
+- Clicking shows dropdown: "Hacked X of Y puzzles"
+- Updates in real-time when puzzles are completed
+
+#### Sound Manager (`source/core/SoundManager.js`)
+- Cross-compatible audio system
+- **Web Audio API** for modern browsers (with buffer preloading)
+- **HTML5 Audio fallback** for older devices (webOS)
+- Graceful failure - sound errors never break game logic
+- `onEnded` callback support for sequenced audio
+- Preloads sounds at startup
+
+#### Sound Effects
+| Sound | Trigger |
+|-------|---------|
+| `success.mp3` | Puzzle completed (score increases) |
+| `dialup.mp3` | Dialing a valid BBS |
+| `dialup-fail.mp3` | Dialing an unknown number |
+| `dialup-noservice.mp3` | Dialing a disconnected BBS (PhreakHole) |
+| `victory.mp3` | Completing Chapter 1 (connecting to Gibson Files) |
+
+#### Quality of Life Improvements
+- **Phone format validation**: `dial` command requires XXX-XXXX format with helpful error message
+- **Password flexibility**: Both "hacker" and "hackers" accepted (case-insensitive)
+- **GameState → PuzzleEngine integration**: `setFlag()` automatically notifies puzzle engine
+- **Delayed BBS replies**: Board posts and emails queued until returning to main menu
+- **New message indicators**: "NEW MAIL" for email, "(New Reply!)" for board messages in main menu
+- **Per-BBS dial sounds**: Each BBS can specify its own dial sound (e.g., `dialup-noservice.mp3` for dead lines)
+- **Connect sounds**: BBS can specify a sound to play on successful connection (e.g., victory sound)
+- **Input disabled during dialing**: Prevents command input race conditions while dial sound plays
+- **Puzzle timing separation**: "Prove Yourself" triggers when sending reply, "Trusted Hacker" triggers when reading response email
+- **Chapter 1 ending**: Gibson Files BBS shows congratulations message with victory sound
+
+### Updated Puzzle Flow
+| # | Puzzle ID | Name | Trigger | Required Flags |
+|---|-----------|------|---------|----------------|
+| 1 | `decrypt_secrets` | Too Many Secrets | Decrypt `too_many_secrets.enc` | None |
+| 2 | `reply_to_acid_burn` | First Contact | Reply to Acid Burn on BBS board | None |
+| 3 | `prove_yourself` | Prove Yourself | Send email to Acid Burn mentioning GIBSON | `replied_to_acid_burn` + `decrypted_too_many_secrets` |
+| 4 | `gain_trust` | Trusted Hacker | Read Acid Burn's response email | `contacted_acid_burn` |
+| 5 | `inside_contact` | Inside Information | Read Elite board message from Acid Burn | `acid_burn_trusts_player` |
+
+### Updated File Structure
+```
+enyo-app/
+├── source/
+│   ├── App.js
+│   ├── core/
+│   │   ├── GameState.js       # Updated: notifies PuzzleEngine on flag changes
+│   │   ├── SaveManager.js
+│   │   ├── PuzzleEngine.js
+│   │   ├── BBSHandler.js      # Updated: delayed message delivery
+│   │   └── SoundManager.js    # NEW: Cross-compatible audio
+│   ├── data/
+│   │   ├── FileSystem.js
+│   │   └── BBSData.js
+│   ├── programs/
+│   │   ├── FileViewer.js
+│   │   └── TextEditor.js      # Updated: accepts hacker/hackers password
+│   └── ui/
+│       ├── Desktop.js
+│       ├── MenuBar.js         # Updated: score counter
+│       ├── Window.js
+│       ├── WindowManager.js
+│       └── Terminal.js        # Updated: dialup sound, format validation
+├── sounds/
+│   ├── success.mp3            # Puzzle completion sound
+│   ├── dialup.mp3             # BBS dialing sound (~11 seconds)
+│   ├── dialup-fail.mp3        # Invalid number dial sound
+│   ├── dialup-noservice.mp3   # Disconnected number sound
+│   └── victory.mp3            # Chapter completion fanfare
+```
+
+### Technical Lessons Learned
+
+#### Audio Compatibility on webOS
+- `cloneNode()` on Audio elements causes `INVALID_STATE_ERR` on old WebKit
+- Solution: Create fresh `Audio()` element each time, wait for `canplay` event
+- Always wrap audio operations in try-catch to prevent game logic failures
+- Call `onEnded` callback even when audio fails so game continues
+
+#### Defensive Sound Design
+- Update game state (score) BEFORE playing sounds
+- Wrap sound playback in try-catch
+- Provide `onEnded` callback that fires even on failure
+- Check `audioSupported` flag before any audio operations
+
+---
+
+## Milestone 4: Chapter 2 - The Heist
+
+**Status:** Planning
+**Date:** TBD
+
+### Story Hooks from Chapter 1
+- Player learned about **Project GIBSON** - a supercomputer at Ellingson Mineral with a backdoor
+- **Acid Burn** is now an ally and has unlocked the Elite section
+- **Crash Override** is identified as an inside contact at Ellingson (from contacts.txt)
+- Player knows Crash Override's modem number: **555-0200** (The Gibson Files BBS)
+- The goal: Find proof of the backdoor/worm before "they" use it
+
+### Potential Chapter 2 Elements
+- Activate The Gibson Files BBS with actual content
+- Communication with Crash Override
+- Infiltrating Ellingson Mineral systems
+- Finding evidence of the worm/backdoor
+- New puzzles and file discoveries
+- Possible new programs (e.g., hex editor, network scanner)
+
+### Technical Considerations
+- Expand BBSData with Gibson Files content
+- Add new files to FileSystem for Chapter 2 discoveries
+- Consider adding a "Network" program to access remote systems
+- New puzzle chain for Chapter 2
 
 ---
 

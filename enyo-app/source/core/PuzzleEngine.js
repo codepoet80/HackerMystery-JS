@@ -91,6 +91,17 @@ enyo.kind({
 			completionFlag: "acid_burn_trusts_player",
 			rewards: {}
 		});
+
+		// Puzzle 5: Find the inside contact hint
+		this.registerPuzzle({
+			id: "inside_contact",
+			name: "Inside Information",
+			description: "Learn about Acid Burn's contact on the inside",
+			chapter: 1,
+			requiredFlags: ["acid_burn_trusts_player"],
+			completionFlag: "found_contacts_hint",
+			rewards: {}
+		});
 	},
 
 	/**

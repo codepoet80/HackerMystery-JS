@@ -97,6 +97,12 @@ enyo.kind({
 		} else {
 			// Show normal content
 			this.showContent(this.fileData.content);
+
+			// Set flag if file has onReadFlag
+			if (this.fileData.onReadFlag) {
+				var gameState = HackerMystery.GameState.getInstance();
+				gameState.setFlag(this.fileData.onReadFlag, true);
+			}
 		}
 	},
 
@@ -156,7 +162,11 @@ enyo.kind({
 		var enteredPassword = this.$.passwordInput.getValue().toLowerCase().trim();
 		var correctPassword = this.fileData.password.toLowerCase();
 
-		if (enteredPassword === correctPassword) {
+		// Accept both singular and plural forms (e.g., "hacker" and "hackers")
+		var passwordMatch = (enteredPassword === correctPassword) ||
+			(correctPassword === "hackers" && enteredPassword === "hacker");
+
+		if (passwordMatch) {
 			// Success!
 			this.isDecrypted = true;
 			this.$.passwordPrompt.setShowing(false);
