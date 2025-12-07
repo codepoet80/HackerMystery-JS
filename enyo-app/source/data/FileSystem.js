@@ -224,8 +224,8 @@ enyo.kind({
 			"       BBS. Find Acid Burn. The password",
 			"       to connect is hidden in plain sight.",
 			"",
-			"       Check the trash. People forget",
-			"       what they throw away.",
+			"       Check the View menu. Find the trash.",
+			"       People forget what they throw away.",
 			""
 		].join("\n");
 	},
