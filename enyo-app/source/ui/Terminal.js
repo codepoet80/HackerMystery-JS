@@ -244,6 +244,7 @@ enyo.kind({
 	 * Append text directly to output
 	 */
 	appendOutput: function(text) {
+		if (!this.$.output) return;
 		var current = this.$.output.getContent();
 		// Escape HTML but preserve newlines
 		var escaped = this.escapeHtml(text);
@@ -253,9 +254,23 @@ enyo.kind({
 	},
 
 	/**
+	 * Check if browser is Chrome/Chromium (has typewriter issues)
+	 */
+	isChrome: function() {
+		var ua = navigator.userAgent || "";
+		return ua.indexOf("Chrome") !== -1 || ua.indexOf("Chromium") !== -1;
+	},
+
+	/**
 	 * Queue text for typewriter effect
 	 */
 	queueTypewriter: function(text) {
+		// Skip typewriter effect on Chrome due to rendering issues
+		if (this.isChrome()) {
+			this.appendOutput(text);
+			return;
+		}
+
 		// Add text to queue
 		for (var i = 0; i < text.length; i++) {
 			this.typewriterQueue.push(text[i]);
@@ -300,7 +315,9 @@ enyo.kind({
 		var scroller = this.$.outputScroller;
 		// Use setTimeout to ensure DOM is updated
 		setTimeout(function() {
-			scroller.scrollToBottom();
+			if (scroller && scroller.scrollToBottom) {
+				scroller.scrollToBottom();
+			}
 		}, 10);
 	},
 

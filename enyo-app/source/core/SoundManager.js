@@ -47,6 +47,7 @@ enyo.kind({
 
 	// List of sounds to preload
 	soundList: [
+		"startup.mp3",
 		"success.mp3",
 		"dialup.mp3",
 		"dialup-fail.mp3",
