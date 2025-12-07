@@ -102,7 +102,15 @@ enyo.kind({
 			date: {
 				description: "Show current date and time",
 				handler: function(args) {
-					return new Date().toString();
+					// Always show a date in April 1995 for immersion
+					var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+					var day = Math.floor(Math.random() * 28) + 1;
+					var dayOfWeek = (6 + day) % 7;  // April 1, 1995 was a Saturday
+					var hour = Math.floor(Math.random() * 24);
+					var min = Math.floor(Math.random() * 60);
+					var sec = Math.floor(Math.random() * 60);
+					var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
+					return days[dayOfWeek] + " Apr " + pad(day) + " " + pad(hour) + ":" + pad(min) + ":" + pad(sec) + " 1995";
 				}
 			},
 			about: {
@@ -111,42 +119,6 @@ enyo.kind({
 					return "HackerMystery Terminal v0.1\n" +
 						"A conspiracy lurks in the shadows...\n" +
 						"Type 'help' for available commands.";
-				}
-			},
-			save: {
-				description: "Save game progress",
-				handler: function(args) {
-					var slot = args[0] ? parseInt(args[0], 10) : 0;
-					if (isNaN(slot) || slot < 0 || slot > 9) {
-						return "Invalid slot. Use: save [0-9]";
-					}
-					var saveManager = HackerMystery.SaveManager.getInstance();
-					saveManager.save(slot, function(success, error) {
-						if (success) {
-							self.println("Game saved to slot " + slot + ".");
-						} else {
-							self.println("Save failed: " + (error || "Unknown error"));
-						}
-					});
-					return "Saving...";
-				}
-			},
-			load: {
-				description: "Load game progress",
-				handler: function(args) {
-					var slot = args[0] ? parseInt(args[0], 10) : 0;
-					if (isNaN(slot) || slot < 0 || slot > 9) {
-						return "Invalid slot. Use: load [0-9]";
-					}
-					var saveManager = HackerMystery.SaveManager.getInstance();
-					saveManager.load(slot, function(success, error) {
-						if (success) {
-							self.println("Game loaded from slot " + slot + ".");
-						} else {
-							self.println("Load failed: " + (error || "Unknown error"));
-						}
-					});
-					return "Loading...";
 				}
 			}
 		};

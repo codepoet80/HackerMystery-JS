@@ -78,6 +78,14 @@ enyo.kind({
 		windowComponent.render();
 		this.bringToFront(windowId);
 
+		// Notify App about the new focused window
+		var content = windowComponent.getContentComponent ? windowComponent.getContentComponent() : null;
+		this.doWindowFocused({
+			window: windowComponent,
+			content: content,
+			contentKind: config.kind
+		});
+
 		return windowComponent;
 	},
 
@@ -98,10 +106,25 @@ enyo.kind({
 			windowInfo.component.destroy();
 			this.windows.splice(index, 1);
 
-			// Focus the new topmost window if any remain
+			// Focus the new topmost window if any remain, or clear focus
 			if (this.windows.length > 0) {
 				var topWindow = this.windows[this.windows.length - 1];
 				topWindow.component.setFocused(true);
+
+				// Notify App about the new focused window
+				var content = topWindow.component.getContentComponent ? topWindow.component.getContentComponent() : null;
+				this.doWindowFocused({
+					window: topWindow.component,
+					content: content,
+					contentKind: topWindow.component.contentKind || null
+				});
+			} else {
+				// No windows left, clear focus
+				this.doWindowFocused({
+					window: null,
+					content: null,
+					contentKind: null
+				});
 			}
 		}
 	},
