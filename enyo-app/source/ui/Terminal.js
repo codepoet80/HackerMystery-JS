@@ -104,13 +104,13 @@ enyo.kind({
 				handler: function(args) {
 					// Always show a date in April 1995 for immersion
 					var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-					var day = Math.floor(Math.random() * 28) + 1;
-					var dayOfWeek = (6 + day) % 7;  // April 1, 1995 was a Saturday
-					var hour = Math.floor(Math.random() * 24);
-					var min = Math.floor(Math.random() * 60);
-					var sec = Math.floor(Math.random() * 60);
+					var day = 23
+					var dayOfWeek = "Sunday"
+					var now = new Date();
+					var hour = now.getHours();
+					var min = now.getMinutes();
 					var pad = function(n) { return n < 10 ? "0" + n : "" + n; };
-					return days[dayOfWeek] + " Apr " + pad(day) + " " + pad(hour) + ":" + pad(min) + ":" + pad(sec) + " 1995";
+					return dayOfWeek + " July " + day + " 1995 " + pad(hour) + ":" + pad(min);
 				}
 			},
 			about: {
