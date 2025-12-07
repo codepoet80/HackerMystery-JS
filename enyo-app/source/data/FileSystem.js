@@ -406,14 +406,14 @@ enyo.kind({
 			"  - Too many narcs",
 			"",
 			"PhreakHole        [DEAD]",
-			"  - Shut down by feds 03/01",
+			"  - Raided by feds?",
 			"",
 			"The Gibson Files  [UNKNOWN]",
 			"  - Rumored to exist",
-			"  - No confirmed access",
+			"  - No access",
 			"",
 			"To connect: Use Terminal",
-			"   command dial, then number",
+			"  command dial then number",
 			""
 		].join("\n");
 	},
