@@ -384,10 +384,9 @@ enyo.kind({
 			"They're going to use it. Soon.",
 			"",
 			"Find Acid Burn on The Underground BBS.",
-			"Show them this file. They'll know",
-			"what to do.",
+			"They'll know what to do.",
 			"",
-			"Boot up or shut up.",
+			"Trust your technolust.",
 			"",
 			"- The Ghost in the Machine",
 			""
