@@ -165,9 +165,50 @@ enyo.kind({
 	 * Set the focused window type to show/hide context menus
 	 */
 	setFocusedWindowType: function(windowType) {
+		var wasShowing = this.focusedWindowType === "HackerMystery.FileViewer";
+		var willShow = windowType === "HackerMystery.FileViewer";
+
 		this.focusedWindowType = windowType;
 		// Show View menu only for FileViewer
-		this.$.viewMenu.setShowing(windowType === "HackerMystery.FileViewer");
+		this.$.viewMenu.setShowing(willShow);
+
+		// Flash highlight when View menu newly appears
+		if (willShow && !wasShowing) {
+			this.flashMenuHighlight();
+		}
+	},
+
+	/**
+	 * Flash the View menu to draw attention to it
+	 */
+	flashMenuHighlight: function() {
+		var viewMenu = this.$.viewMenu;
+		var node = viewMenu.hasNode();
+		if (!node) return;
+
+		var flashCount = 0;
+		var maxFlashes = 4;  // 2 full on/off cycles
+
+		var doFlash = function() {
+			if (flashCount >= maxFlashes) {
+				node.className = node.className.replace(/\s*hm-menubar-highlight/g, "");
+				return;
+			}
+
+			if (flashCount % 2 === 0) {
+				// Add highlight
+				node.className += " hm-menubar-highlight";
+			} else {
+				// Remove highlight
+				node.className = node.className.replace(/\s*hm-menubar-highlight/g, "");
+			}
+
+			flashCount++;
+			setTimeout(doFlash, 150);
+		};
+
+		// Start flashing after a brief delay
+		setTimeout(doFlash, 100);
 	},
 
 	/**

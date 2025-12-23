@@ -474,7 +474,7 @@
 
 /* Hidden file indicator */
 .hm-fileicon-hidden {
-	opacity: 0.7;
+	opacity: 0.4;
 }
 
 .hm-fileicon-label {
@@ -793,4 +793,10 @@
 .hm-menubar-item-disabled:hover {
 	background-color: #FFFFFF;
 	color: #000000;
+}
+
+/* Highlight effect for menu items that appear dynamically */
+.hm-menubar-highlight .hm-menubar-menu-title {
+	background-color: #000000;
+	color: #FFFFFF;
 }

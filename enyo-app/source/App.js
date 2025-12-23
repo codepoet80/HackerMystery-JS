@@ -52,6 +52,11 @@ enyo.kind({
 		this.inherited(arguments);
 		enyo.log("HackerMystery starting up...");
 
+		// Enable fullscreen mode to hide webOS titlebar
+		if (window.PalmSystem && window.PalmSystem.enableFullScreenMode) {
+			window.PalmSystem.enableFullScreenMode(true);
+		}
+
 		// Initialize filesystem
 		HackerMystery.FileSystem.getInstance();
 

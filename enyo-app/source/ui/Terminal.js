@@ -337,6 +337,13 @@ enyo.kind({
 	handleKeyDown: function(inSender, inEvent) {
 		var keyCode = inEvent.keyCode;
 
+		// If waiting for any key, accept any printable key or Enter
+		if (this.bbsWaitingForKey && (keyCode === 13 || keyCode >= 32)) {
+			this.executeCurrentInput();
+			inEvent.preventDefault();
+			return true;
+		}
+
 		// Enter - execute command
 		if (keyCode === 13) {
 			this.executeCurrentInput();
