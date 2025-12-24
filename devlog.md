@@ -452,7 +452,119 @@ enyo-app/
 
 ---
 
-## Milestone 4: Chapter 2 - The Heist
+## Milestone 4: BBS Bug Fixes & Guestbook Feature (12/24/2024)
+
+**Status:** Complete
+**Date:** December 24, 2024
+
+### BBS Bug Fixes
+
+#### Navigation Bug After Posting Board Reply
+- **Issue**: After posting a reply to a board message, pressing [B] went to the boards list instead of the message list
+- **Fix**: Changed state from `STATE_READING_BOARD` to `STATE_READING_MESSAGE` after posting, so [B] correctly maps to `showBoardMessages()`
+
+#### Help and Who's Online "Press Any Key" Not Working
+- **Issue**: After viewing Help or Who's Online, pressing any key did nothing - user was stuck
+- **Root Cause**: `showHelp()` and `showWhosOnline()` returned `waitForKey: true` but didn't change the session state, so input was still processed by `handleMainMenu()` which expected a valid menu choice
+- **Fix**: Added new state `STATE_PRESS_ANY_KEY` that returns to main menu on any input
+
+#### Terminal Empty Input for "Press Any Key"
+- **Issue**: In Terminal, empty input was rejected before reaching the `waitForKey` handler
+- **Fix**: Modified `executeCurrentInput()` to allow empty input when `bbsWaitingForKey` is true, and skip echo/history for "press any key" mode
+
+#### BBS Disconnect on Terminal Close
+- **Issue**: Closing the terminal window while connected to a BBS left the connection in a stale state
+- **Fix**: Added `bbsHandler.disconnect()` call in Terminal's `destroy()` method
+
+### Guestbook Feature
+
+Added an online guestbook to The Underground BBS (555-0199).
+
+#### Client-Side Implementation (`source/core/BBSHandler.js`)
+
+**New States:**
+- `STATE_GUESTBOOK` - Viewing guestbook entries
+- `STATE_SIGNING_GUESTBOOK_NAME` - Entering name to sign
+- `STATE_SIGNING_GUESTBOOK` - Entering message to sign
+
+**Features:**
+- `[S] See Guestbook` option in main menu
+- Fetches guestbook.csv from remote server with cache-busting
+- Displays entries in BBS style with formatted dates (using `toLocaleDateString()`)
+- Two-step signing process: name first, then message
+- Profanity filter using bad words list from GitHub
+- Offline fallback to hardcoded entry when server unreachable
+- Protocol detection - uses http by default, upgrades to https if app is served over https (for older devices with TLS issues)
+
+**New Methods:**
+- `showGuestbook()` - Fetches and displays guestbook
+- `fetchGuestbook(url, callback)` - Async fetch helper
+- `displayGuestbook(data)` - Renders guestbook entries
+- `handleGuestbook(input)` - Handles S/M menu choice
+- `handleSigningGuestbookName(input)` - Collects username
+- `handleSigningGuestbook(input)` - Collects message and POSTs to server
+- `loadBadWords()` - Fetches profanity list on startup
+- `containsProfanity(text)` - Checks text with word boundary matching
+- `upgradeUrlsIfSecure()` - Upgrades http to https if needed
+- `parseCSVLine(line)` - Parses CSV handling quoted fields
+
+#### Server-Side Implementation (`server/guestbook.php`)
+
+**Features:**
+- Receives POST with username and message
+- Profanity filter with word boundary matching (same as client)
+- Caches bad words list in `data/badwords_cache.txt` for 30 days
+- Appends entries to `data/guestbook.csv`
+- Keeps only last 100 entries
+- CORS headers for cross-origin access
+- Error suppression to prevent broken responses
+
+**Security:**
+- Sanitizes username (alphanumeric only, max 20 chars)
+- Truncates message to 200 chars
+- Escapes CSV special characters (commas, quotes, newlines)
+
+### Technical Lessons Learned
+
+#### Word Boundary Matching for Profanity Filter
+- Simple substring matching causes false positives (e.g., "hello" contains "hell")
+- Solution: Use regex with word boundaries `\b`
+- JavaScript: `new RegExp("\\b" + word + "\\b", "i")`
+- PHP: `'/\b' . preg_quote($word, '/') . '\b/i'`
+
+#### CSV Safety
+- Strip commas from user input to prevent CSV injection
+- Alternatively, wrap fields containing commas/quotes in double quotes and escape internal quotes
+
+#### PHP Error Suppression
+- PHP warnings output to response body can break JSON/text responses
+- Use `error_reporting(0)` at script start
+- Use `@` prefix on file operations that might fail
+- Store cache files in writable `data/` directory, not code directory
+
+#### Protocol Detection for Legacy Devices
+- Older devices may have issues with modern TLS certificates
+- Default to http for maximum compatibility
+- Upgrade to https only if app is already served over https: `window.location.protocol === "https:"`
+
+### Updated File Structure
+```
+enyo-app/
+├── source/
+│   ├── core/
+│   │   └── BBSHandler.js      # Updated: guestbook, bug fixes
+│   └── ui/
+│       └── Terminal.js        # Updated: press-any-key fix, disconnect on close
+├── server/
+│   ├── guestbook.php          # NEW: Guestbook API
+│   └── data/
+│       ├── guestbook.csv      # Guestbook entries
+│       └── badwords_cache.txt # Cached profanity list
+```
+
+---
+
+## Milestone 5: Chapter 2 - The Heist
 
 **Status:** Planning
 **Date:** TBD

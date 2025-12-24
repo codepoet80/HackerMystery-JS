@@ -107,7 +107,7 @@ enyo.kind({
 			date: {
 				description: "Show current date and time",
 				handler: function(args) {
-					// Always show a date in April 1995 for immersion
+					// Always show a date in July 1995 for immersion
 					var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 					var day = 23
 					var dayOfWeek = "Sunday"
@@ -122,8 +122,8 @@ enyo.kind({
 				description: "About this system",
 				handler: function(args) {
 					return "HackerMystery Terminal v0.1\n" +
-						"A conspiracy lurks in the shadows...\n" +
-						"Type 'help' for available commands.";
+						"A conspiracy lurks in the shadows!\n" +
+						"Don't forget to look in Files...";
 				}
 			},
 			dial: {
