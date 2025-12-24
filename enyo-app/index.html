@@ -31,8 +31,47 @@
 		<script src="cordova.js"></script>
 	</head>
 	<body>
+	<!-- Title Screen -->
+	<div id="titleScreen" class="hm-title-screen" onclick="startGame()">
+		<div class="hm-title-content">
+			<img src="images/HackerMysteryPoster-Wide.png" alt="Hacker Mystery 95" class="hm-title-poster">
+			<div class="hm-title-click">Click To Begin</div>
+		</div>
+		<div class="hm-title-copyright">
+			Copyright 2026, <a href="https://github.com/codepoet80/HackerMystery-JS/" target="_blank" onclick="event.stopPropagation()">codepoet</a>
+		</div>
+	</div>
+
+	<!-- Game Container (hidden initially) -->
+	<div id="gameContainer" style="display: none; width: 100%; height: 100%;"></div>
+
 	<script type="text/javascript">
-		new HackerMystery.App().renderInto(document.body);
+		// Initialize SoundManager early so sounds are preloaded before user clicks
+		var soundManager;
+		window.onload = function() {
+			// SoundManager should be available after all scripts load
+			if (typeof HackerMystery !== 'undefined' && HackerMystery.SoundManager) {
+				soundManager = HackerMystery.SoundManager.getInstance();
+				console.log("SoundManager initialized on window.onload");
+			}
+		};
+
+		function startGame() {
+			// Play startup sound - user click satisfies browser autoplay restrictions
+			if (soundManager) {
+				soundManager.play("startup.mp3");
+			}
+
+			// Hide title screen
+			document.getElementById('titleScreen').style.display = 'none';
+
+			// Show game container
+			var gameContainer = document.getElementById('gameContainer');
+			gameContainer.style.display = 'block';
+
+			// Render the game into the container
+			new HackerMystery.App().renderInto(gameContainer);
+		}
 	</script>
 	</body>
 </html>

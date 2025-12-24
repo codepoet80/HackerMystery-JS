@@ -77,53 +77,6 @@ enyo.kind({
 		// Update initial score display
 		this.updateScoreDisplay();
 
-		// Play startup sound - try autoplay, with interaction fallback for modern browsers
-		var startupPlayed = false;
-		var soundManager = HackerMystery.SoundManager.getInstance();
-
-		var removeListeners = function() {
-			document.removeEventListener("click", playOnce, true);
-			document.removeEventListener("touchstart", playOnce, true);
-			document.removeEventListener("keydown", playOnce, true);
-		};
-
-		var playOnce = function() {
-			if (startupPlayed) return;
-			startupPlayed = true;
-			removeListeners();
-			soundManager.play("startup.mp3");
-		};
-
-		// Set up interaction listeners for modern browsers that block autoplay
-		document.addEventListener("click", playOnce, true);
-		document.addEventListener("touchstart", playOnce, true);
-		document.addEventListener("keydown", playOnce, true);
-
-		// Try to autoplay (works on webOS and older browsers)
-		setTimeout(function() {
-			if (startupPlayed) return;
-			try {
-				var audio = new Audio("sounds/startup.mp3");
-				var playResult = audio.play();
-				// Modern browsers return a promise
-				if (playResult && playResult.then) {
-					playResult.then(function() {
-						// Autoplay succeeded
-						startupPlayed = true;
-						removeListeners();
-					}).catch(function() {
-						// Autoplay blocked, listeners will handle it
-					});
-				} else {
-					// Old browser (webOS) - no promise means it worked
-					startupPlayed = true;
-					removeListeners();
-				}
-			} catch (e) {
-				// Play failed, interaction listeners will handle it
-			}
-		}, 100);
-
 		// Auto-launch terminal on startup for that authentic hacker feel
 		// Delay to ensure app is fully initialized
 		var self = this;
