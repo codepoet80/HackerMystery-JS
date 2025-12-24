@@ -26,5 +26,8 @@ enyo.depends(
 	"source/programs/TextEditor.js",
 
 	// Main application
-	"source/App.js"
+	"source/App.js",
+
+	//Helpers
+	"source/UpdateHelper.js"
 );

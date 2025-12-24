@@ -45,7 +45,8 @@ enyo.kind({
 					]
 				}
 			]
-		}
+		},
+		{kind: 'Helpers.Updater', name:"myUpdater", onUpdateFound:"handleUpdateFound", handleUI: false},
 	],
 
 	create: function() {
@@ -83,6 +84,8 @@ enyo.kind({
 		setTimeout(function() {
 			self.launchProgram("terminal");
 		}, 500);
+
+		this.$.myUpdater.CheckForUpdate("Hacker Mystery 95");
 	},
 
 	/**
@@ -308,5 +311,12 @@ enyo.kind({
 			var newState = this.focusedContent.toggleShowHidden();
 			this.$.menuBar.setShowHiddenState(newState);
 		}
-	}
+	},
+
+	/**
+	 * Handle updates from App Museum
+	 */
+	handleUpdateFound: function(sender, message) {
+		this.showAlert("Update found!", message + " Visit your App Store to download it!");
+	},
 });
