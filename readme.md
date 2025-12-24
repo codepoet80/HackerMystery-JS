@@ -1,6 +1,6 @@
 # Hacker Mystery 95
 
-![meta/HackerMystery-64.png](HackerMystery-64.png)
+![Icon](meta/HackerMystery-64.png)
 
 This is my first attempt at a game! I honestly wouldn't be able to do this without Claude. I'm using Opus 4.5, working out a plan, and then letting it do most of the implementation. I do play testing and help it fix bugs, or do some manual tweaks where needed.
 
