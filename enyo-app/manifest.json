@@ -1,5 +1,16 @@
 {
  "name": "Hacker Mystery 95",
+ "short_name": "HackerMystery",
+ "description": "A hacker mystery with a 90s aesthetic",
+ "start_url": "./index.html",
+ "id": "./manifest.json",
+ "display": "standalone",
+ "orientation": "landscape",
+ "theme_color": "#00FF00",
+ "background_color": "#000000",
+ "categories": ["games"],
+ "lang": "en",
+
  "icons": [
   {
    "src": "favicons\/android-icon-36x36.png",
