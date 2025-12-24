@@ -6,6 +6,9 @@
  * Make sure data/guestbook.csv is writable by the web server
  */
 
+// Suppress errors from being output (they break the response)
+error_reporting(0);
+
 // Allow CORS for game access
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -28,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Configuration
 $csvFile = __DIR__ . '/data/guestbook.csv';
 $badWordsUrl = 'https://raw.githubusercontent.com/dsojevic/profanity-list/refs/heads/main/en.txt';
-$badWordsCacheFile = __DIR__ . '/badwords_cache.txt';
-$badWordsCacheTime = 86400; // Cache for 24 hours
+$badWordsCacheFile = __DIR__ . '/data/badwords_cache.txt';  // Store in data/ which should be writable
+$badWordsCacheTime = 2592000; // Cache for a month
 $maxMessageLength = 200;
 $maxEntries = 100; // Keep only last 100 entries
 
@@ -56,18 +59,22 @@ $message = substr($message, 0, $maxMessageLength);
 // Load bad words list (with caching)
 function loadBadWords($url, $cacheFile, $cacheTime) {
     $badWords = array();
+    $content = false;
 
-    // Check cache
+    // Check cache first
     if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTime) {
-        $content = file_get_contents($cacheFile);
-    } else {
-        // Fetch fresh list
+        $content = @file_get_contents($cacheFile);
+    }
+
+    // If no cache or cache read failed, fetch fresh
+    if ($content === false) {
         $content = @file_get_contents($url);
         if ($content !== false) {
-            file_put_contents($cacheFile, $content);
+            // Try to cache it, but don't fail if we can't
+            @file_put_contents($cacheFile, $content);
         } elseif (file_exists($cacheFile)) {
             // Use stale cache if fetch fails
-            $content = file_get_contents($cacheFile);
+            $content = @file_get_contents($cacheFile);
         }
     }
 
@@ -84,12 +91,14 @@ function loadBadWords($url, $cacheFile, $cacheTime) {
     return $badWords;
 }
 
-// Check for profanity
+// Check for profanity (whole word matching to avoid false positives)
 function containsProfanity($text, $badWords) {
     $lowerText = strtolower($text);
 
     foreach ($badWords as $word) {
-        if (strpos($lowerText, $word) !== false) {
+        // Use word boundary matching to avoid false positives like "hello" containing "hell"
+        $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
+        if (preg_match($pattern, $lowerText)) {
             return true;
         }
     }
@@ -123,7 +132,10 @@ $csvLine = $date . ',' . escapeCSV($username) . ',' . escapeCSV($message) . "\n"
 // Read existing entries
 $entries = array();
 if (file_exists($csvFile)) {
-    $entries = file($csvFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $entries = @file($csvFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($entries === false) {
+        $entries = array();
+    }
 }
 
 // Add new entry
@@ -135,7 +147,7 @@ if (count($entries) > $maxEntries) {
 }
 
 // Write back
-if (file_put_contents($csvFile, implode("\n", $entries) . "\n") !== false) {
+if (@file_put_contents($csvFile, implode("\n", $entries) . "\n") !== false) {
     http_response_code(200);
     echo 'OK';
 } else {

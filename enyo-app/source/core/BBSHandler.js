@@ -1304,7 +1304,7 @@ enyo.kind({
 		this.sessionState = HackerMystery.BBSHandler.STATE_SIGNING_GUESTBOOK;
 
 		return {
-			message: "\nNow enter your message (keep it clean!):\n" +
+			message: "\nNow enter your message (keep it clean and short!):\n" +
 				"> "
 		};
 	},
