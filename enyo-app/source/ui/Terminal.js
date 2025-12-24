@@ -393,6 +393,12 @@ enyo.kind({
 		var input = this.$.input.getValue().trim();
 		this.$.input.setValue("");
 
+		// Handle "press any key" mode - don't echo or add to history
+		if (this.bbsWaitingForKey) {
+			this.executeCommand(input);
+			return;
+		}
+
 		if (input === "") return;
 
 		// Add to history
@@ -503,6 +509,13 @@ enyo.kind({
 		if (this.typewriterTimer) {
 			clearTimeout(this.typewriterTimer);
 		}
+
+		// Disconnect from BBS if connected
+		var bbsHandler = HackerMystery.BBSHandler.getInstance();
+		if (bbsHandler.isConnected()) {
+			bbsHandler.disconnect();
+		}
+
 		this.inherited(arguments);
 	}
 });

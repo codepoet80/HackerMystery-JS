@@ -28,7 +28,8 @@ enyo.kind({
 		STATE_READING_EMAIL: "reading_email",
 		STATE_COMPOSING: "composing",
 		STATE_COMPOSING_BOARD: "composing_board",
-		STATE_STATIC_MESSAGE: "static_message"
+		STATE_STATIC_MESSAGE: "static_message",
+		STATE_PRESS_ANY_KEY: "press_any_key"
 	},
 
 	// Current session
@@ -235,6 +236,10 @@ enyo.kind({
 			case HackerMystery.BBSHandler.STATE_STATIC_MESSAGE:
 				// Any input disconnects
 				return this.disconnect();
+
+			case HackerMystery.BBSHandler.STATE_PRESS_ANY_KEY:
+				// Any input returns to main menu
+				return this.returnToMainMenu();
 
 			default:
 				return { message: "ERROR: Unknown state" };
@@ -668,8 +673,8 @@ enyo.kind({
 		// Mark message as replied (disable further replies)
 		this.currentMessage.canReply = false;
 
-		// Return to board list with simple confirmation
-		this.sessionState = HackerMystery.BBSHandler.STATE_READING_BOARD;
+		// Return with confirmation - use STATE_READING_MESSAGE so B goes to message list
+		this.sessionState = HackerMystery.BBSHandler.STATE_READING_MESSAGE;
 
 		return {
 			message: "\nYour reply has been posted.\n\n" +
@@ -905,6 +910,8 @@ enyo.kind({
 	 * Show who's online
 	 */
 	showWhosOnline: function() {
+		this.sessionState = HackerMystery.BBSHandler.STATE_PRESS_ANY_KEY;
+
 		var lines = [
 			"",
 			"================================",
@@ -931,6 +938,8 @@ enyo.kind({
 	 * Show help
 	 */
 	showHelp: function() {
+		this.sessionState = HackerMystery.BBSHandler.STATE_PRESS_ANY_KEY;
+
 		var lines = [
 			"",
 			"================================",
