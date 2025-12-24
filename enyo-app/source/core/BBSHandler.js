@@ -29,7 +29,10 @@ enyo.kind({
 		STATE_COMPOSING: "composing",
 		STATE_COMPOSING_BOARD: "composing_board",
 		STATE_STATIC_MESSAGE: "static_message",
-		STATE_PRESS_ANY_KEY: "press_any_key"
+		STATE_PRESS_ANY_KEY: "press_any_key",
+		STATE_GUESTBOOK: "guestbook",
+		STATE_SIGNING_GUESTBOOK_NAME: "signing_guestbook_name",
+		STATE_SIGNING_GUESTBOOK: "signing_guestbook"
 	},
 
 	// Current session
@@ -52,11 +55,42 @@ enyo.kind({
 	// Flag to show new board message notification
 	hasNewBoardMessage: false,
 
+	// Bad words list for profanity filter
+	badWords: null,
+	badWordsLoaded: false,
+
+	// Guestbook URLs (default to http, upgraded to https if client is on https)
+	guestbookUrl: "http://hackermystery95.wosa.link/app/server/data/guestbook.csv",
+	guestbookPostUrl: "http://hackermystery95.wosa.link/app/server/guestbook.php",
+	badWordsUrl: "https://raw.githubusercontent.com/dsojevic/profanity-list/refs/heads/main/en.txt",
+
+	// Flag for offline guestbook mode (no signing available)
+	guestbookOffline: false,
+
+	// Pending guestbook sign data
+	pendingGuestbookName: null,
+
 	create: function() {
 		this.inherited(arguments);
 		this.sessionState = HackerMystery.BBSHandler.STATE_DISCONNECTED;
 		this.pendingEmails = [];
 		this.pendingBoardReplies = [];
+		this.badWords = [];
+
+		// Upgrade URLs to https if client is already on https
+		this.upgradeUrlsIfSecure();
+
+		this.loadBadWords();
+	},
+
+	/**
+	 * Upgrade remote URLs to https if the app is served over https
+	 */
+	upgradeUrlsIfSecure: function() {
+		if (window.location.protocol === "https:") {
+			this.guestbookUrl = this.guestbookUrl.replace("http://", "https://");
+			this.guestbookPostUrl = this.guestbookPostUrl.replace("http://", "https://");
+		}
 	},
 
 	/**
@@ -188,6 +222,7 @@ enyo.kind({
 			menu.push("  [E] Email");
 		}
 
+		menu.push("  [S] See Guestbook");
 		menu.push("  [W] Who's Online");
 		menu.push("  [H] Help");
 		menu.push("  [G] Goodbye (disconnect)");
@@ -241,6 +276,15 @@ enyo.kind({
 				// Any input returns to main menu
 				return this.returnToMainMenu();
 
+			case HackerMystery.BBSHandler.STATE_GUESTBOOK:
+				return this.handleGuestbook(input);
+
+			case HackerMystery.BBSHandler.STATE_SIGNING_GUESTBOOK_NAME:
+				return this.handleSigningGuestbookName(input);
+
+			case HackerMystery.BBSHandler.STATE_SIGNING_GUESTBOOK:
+				return this.handleSigningGuestbook(input);
+
 			default:
 				return { message: "ERROR: Unknown state" };
 		}
@@ -288,6 +332,9 @@ enyo.kind({
 
 			case "W":
 				return this.showWhosOnline();
+
+			case "S":
+				return this.showGuestbook();
 
 			case "H":
 				return this.showHelp();
@@ -985,5 +1032,349 @@ enyo.kind({
 			message: "\nDisconnecting...\n\nNO CARRIER\n",
 			disconnected: true
 		};
+	},
+
+	/**
+	 * Load bad words list for profanity filter
+	 */
+	loadBadWords: function() {
+		var self = this;
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", this.badWordsUrl, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					var lines = xhr.responseText.split("\n");
+					self.badWords = [];
+					for (var i = 0; i < lines.length; i++) {
+						var word = lines[i].trim().toLowerCase();
+						if (word) {
+							self.badWords.push(word);
+						}
+					}
+					self.badWordsLoaded = true;
+				}
+			}
+		};
+		try {
+			xhr.send();
+		} catch (e) {
+			// Silently fail - profanity filter won't work but guestbook still will
+		}
+	},
+
+	/**
+	 * Check if text contains profanity (whole word matching)
+	 * @param {string} text - Text to check
+	 * @returns {boolean} - True if profanity found
+	 */
+	containsProfanity: function(text) {
+		if (!this.badWordsLoaded || !this.badWords.length) {
+			return false;
+		}
+
+		var lowerText = text.toLowerCase();
+
+		for (var i = 0; i < this.badWords.length; i++) {
+			var word = this.badWords[i];
+			// Use word boundary matching to avoid false positives like "hello" containing "hell"
+			// Create a regex with word boundaries: \b matches word boundary
+			try {
+				var regex = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i");
+				if (regex.test(lowerText)) {
+					return true;
+				}
+			} catch (e) {
+				// Fallback to simple indexOf for invalid regex patterns
+				if (lowerText.indexOf(word) !== -1) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	},
+
+	/**
+	 * Show guestbook - fetches data asynchronously
+	 */
+	showGuestbook: function() {
+		var self = this;
+		this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+
+		// Show loading message
+		if (this.terminal) {
+			this.terminal.println("\nLoading guestbook...\n");
+		}
+
+		// Try remote URL first, fallback to hardcoded offline message
+		this.fetchGuestbook(this.guestbookUrl + "?t=" + Date.now(), function(success, data) {
+			if (success) {
+				self.guestbookOffline = false;
+				self.displayGuestbook(data);
+			} else {
+				// Fallback to hardcoded offline guestbook
+				self.guestbookOffline = true;  // No signing in offline mode
+				self.displayGuestbook("2025-12-24 19:59:47,codepoet,Thanks for playing!");
+			}
+		});
+
+		// Return empty - output is async
+		return { message: "" };
+	},
+
+	/**
+	 * Fetch guestbook data from URL
+	 */
+	fetchGuestbook: function(url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200 && xhr.responseText) {
+					callback(true, xhr.responseText);
+				} else {
+					callback(false, null);
+				}
+			}
+		};
+		xhr.onerror = function() {
+			callback(false, null);
+		};
+		try {
+			xhr.send();
+		} catch (e) {
+			callback(false, null);
+		}
+	},
+
+	/**
+	 * Display guestbook entries
+	 */
+	displayGuestbook: function(data) {
+		var self = this;
+		var lines = [
+			"",
+			"================================",
+			"        GUESTBOOK",
+			"================================",
+			""
+		];
+
+		if (data) {
+			var rows = data.split("\n");
+			var entryCount = 0;
+
+			for (var i = 0; i < rows.length; i++) {
+				var row = rows[i].trim();
+				if (!row) continue;
+
+				// Parse CSV: date,username,message
+				var parts = self.parseCSVLine(row);
+				if (parts.length >= 3) {
+					var dateStr = parts[0];
+					var username = parts[1];
+					var message = parts[2];
+
+					// Format date
+					var formattedDate = dateStr;
+					try {
+						var date = new Date(dateStr);
+						if (!isNaN(date.getTime())) {
+							formattedDate = date.toLocaleDateString();
+						}
+					} catch (e) {
+						// Keep original date string
+					}
+
+					lines.push("  " + username + " (" + formattedDate + "):");
+					lines.push("    \"" + message + "\"");
+					lines.push("");
+					entryCount++;
+				}
+			}
+
+			if (entryCount === 0) {
+				lines.push("  No entries yet.");
+				lines.push("");
+			}
+		} else {
+			lines.push("  Unable to load guestbook.");
+			lines.push("  Please try again later.");
+			lines.push("");
+		}
+
+		lines.push("--------------------------------");
+		if (this.guestbookOffline) {
+			lines.push("[M] Main Menu");
+		} else {
+			lines.push("[S] Sign Guestbook  [M] Main Menu");
+		}
+		lines.push("");
+
+		if (this.terminal) {
+			this.terminal.println(lines.join("\n"));
+		}
+	},
+
+	/**
+	 * Parse a CSV line handling quoted fields
+	 */
+	parseCSVLine: function(line) {
+		var result = [];
+		var current = "";
+		var inQuotes = false;
+
+		for (var i = 0; i < line.length; i++) {
+			var char = line[i];
+
+			if (char === '"') {
+				inQuotes = !inQuotes;
+			} else if (char === ',' && !inQuotes) {
+				result.push(current.trim());
+				current = "";
+			} else {
+				current += char;
+			}
+		}
+
+		result.push(current.trim());
+		return result;
+	},
+
+	/**
+	 * Handle guestbook menu choice
+	 */
+	handleGuestbook: function(input) {
+		var choice = input.toUpperCase();
+
+		if (choice === "M") {
+			return this.returnToMainMenu();
+		}
+
+		if (choice === "S" && !this.guestbookOffline) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_SIGNING_GUESTBOOK_NAME;
+			this.pendingGuestbookName = null;
+			return {
+				message: "\n" +
+					"--------------------------------\n" +
+					"     SIGN THE GUESTBOOK\n" +
+					"--------------------------------\n" +
+					"\n" +
+					"Enter your name:\n" +
+					"> "
+			};
+		}
+
+		if (this.guestbookOffline) {
+			return { message: "Invalid choice. [M] Menu: " };
+		}
+		return { message: "Invalid choice. [S] Sign  [M] Menu: " };
+	},
+
+	/**
+	 * Handle guestbook name entry
+	 */
+	handleSigningGuestbookName: function(input) {
+		if (!input || !input.trim()) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			return { message: "No name entered.\n\n[S] Sign Guestbook  [M] Main Menu\n" };
+		}
+
+		// Strip commas from name for CSV safety
+		var name = input.trim().replace(/,/g, "");
+
+		// Limit name length
+		if (name.length > 20) {
+			name = name.substring(0, 20);
+		}
+
+		// Check for profanity in name
+		if (this.containsProfanity(name)) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			return {
+				message: "\nSorry, that name contains inappropriate\n" +
+					"language.\n\n" +
+					"[S] Sign Guestbook  [M] Main Menu\n"
+			};
+		}
+
+		// Store name and prompt for message
+		this.pendingGuestbookName = name;
+		this.sessionState = HackerMystery.BBSHandler.STATE_SIGNING_GUESTBOOK;
+
+		return {
+			message: "\nNow enter your message (keep it clean!):\n" +
+				"> "
+		};
+	},
+
+	/**
+	 * Handle signing the guestbook
+	 */
+	handleSigningGuestbook: function(input) {
+		var self = this;
+
+		if (!input || !input.trim()) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			return { message: "No message entered.\n\n[S] Sign Guestbook  [M] Main Menu\n" };
+		}
+
+		// Check for profanity
+		if (this.containsProfanity(input)) {
+			this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			return {
+				message: "\nSorry, your message contains inappropriate\n" +
+					"language and cannot be posted.\n\n" +
+					"[S] Sign Guestbook  [M] Main Menu\n"
+			};
+		}
+
+		// Strip commas and limit message length for CSV safety
+		var message = input.trim().replace(/,/g, "");
+		if (message.length > 200) {
+			message = message.substring(0, 200);
+		}
+
+		// Use the name collected in the previous step
+		var username = this.pendingGuestbookName || "guest";
+
+		// Show posting message
+		if (this.terminal) {
+			this.terminal.println("\nPosting to guestbook...");
+		}
+
+		// POST to server
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", this.guestbookPostUrl, true);
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					if (self.terminal) {
+						self.terminal.println("\nThanks for signing the guestbook!\n\n[M] Main Menu\n");
+					}
+				} else {
+					if (self.terminal) {
+						self.terminal.println("\nError posting message. Try again later.\n\n[M] Main Menu\n");
+					}
+				}
+				self.pendingGuestbookName = null;
+				self.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			}
+		};
+
+		try {
+			var postData = "username=" + encodeURIComponent(username) +
+				"&message=" + encodeURIComponent(message);
+			xhr.send(postData);
+		} catch (e) {
+			this.pendingGuestbookName = null;
+			this.sessionState = HackerMystery.BBSHandler.STATE_GUESTBOOK;
+			return { message: "Error posting message.\n\n[M] Main Menu\n" };
+		}
+
+		// Return empty - output is async
+		return { message: "" };
 	}
 });
