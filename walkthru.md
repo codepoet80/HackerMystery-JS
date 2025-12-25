@@ -1,18 +1,18 @@
 # Chapter 1
-Open the Files viewer on the Desktop
-Choose "Show Hidden Files" from View menu
-Open all the files, find the password: Hackers
-Open the encrypted file, use the password
-Dial The Underground in Terminal 555-0199, use the password
-Read the message board, reply to Acid Burn
-Go to main menu, then back to message board
-Read the response from Acid Burn
-Go to main menu, open email from Acid Burn
-Reply to Acid Burn with the project name: gibson
-Go to main menu, go to message boards
-Open Elite message board message, read the message
-Go to main menu, disconnect
-Open Documents in Files viewer
-Open contacts.txt (now unlocked), find the Gibson dial-up number
-Dial Gibson files 555-0200
-End of Chapter 1!
+- Open the Files viewer on the Desktop
+- Choose "Show Hidden Files" from View menu
+- Open all the files, find the password: Hackers
+- Open the encrypted file, use the password
+- Dial The Underground in Terminal 555-0199, use the password
+- Read the message board, reply to Acid Burn
+- Go to main menu, then back to message board
+- Read the response from Acid Burn
+- Go to main menu, open email from Acid Burn
+- Reply to Acid Burn with the project name: gibson
+- Go to main menu, go to message boards
+- Open Elite message board message, read the message
+- Go to main menu, disconnect
+- Open Documents in Files viewer
+- Open contacts.txt (now unlocked), find the Gibson dial-up number
+- Dial Gibson files 555-0200
+- End of Chapter 1!
