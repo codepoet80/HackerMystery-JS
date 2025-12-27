@@ -9,8 +9,7 @@ $title = "Hacker Mystery 95";
 $subtitle = " | A computing caper with a 90s aesthetic, compatible with webOS 3 and newer browsers.";
 $github = "https://github.com/codepoet80/hackermystery-js";
 $pwaLink = "/app";
-//$githubLink = "https://github.com/codepoet80/FeedSpider2/releases";
-$museumLink = "https://appcatalog.webosarchive.org/showMuseum.php?search=hackermystery95";
+$museumLink = "https://appcatalog.webosarchive.org/app/HackerMystery95";
 $icon = "icon.png";
 
 //Figure out what protocol the client wanted
