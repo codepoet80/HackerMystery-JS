@@ -43,7 +43,6 @@ if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
   <style>
 	h1 { padding-left: 0px !important; }
 	#content { width: 60% !important; }
-	#hero { width: 40% !important; }
   </style>
 </head>
 <body>
@@ -79,7 +78,7 @@ echo file_get_contents("https://www.webosarchive.org/menu.php?docRoot=" . $docRo
       </p>
     </div>
     <div id="hero">
-      <img src="hero.png" height="460" style="height:460px" alt="<?php echo $title ?>"/>
+      <img src="hero.png" height="460" style="height:460px; width:280px !important;" alt="<?php echo $title ?>"/>
     </div>
   </div>
   <div id="footer">
