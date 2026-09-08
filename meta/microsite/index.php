@@ -78,7 +78,7 @@ echo file_get_contents("https://www.webosarchive.org/menu.php?docRoot=" . $docRo
       </p>
     </div>
     <div id="hero">
-      <img src="hero.png" height="460" style="height:460px; width:280px !important;" alt="<?php echo $title ?>"/>
+      <img src="hero.png" height="480" style="height:480px; width:537px !important;" alt="<?php echo $title ?>"/>
     </div>
   </div>
   <div id="footer">
